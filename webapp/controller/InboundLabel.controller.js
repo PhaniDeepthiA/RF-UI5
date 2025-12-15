@@ -53,10 +53,10 @@ _startHuFlow: async function (sHu) {
 
     try {
         sap.ui.core.BusyIndicator.show(0);
-        console.log("🚀 Starting HU → IBD → PO → DocFlow → MatDoc pipeline");
+        console.log("Starting HU → IBD → PO → DocFlow → MatDoc pipeline");
 
         // --------------------------
-        // 1️⃣ FETCH HU DETAILS
+        // 1 FETCH HU DETAILS
         // --------------------------
         const hu = await this._fetchHUDetails(sHu);
         if (!hu) throw new Error("HU fetch failed. Stopping pipeline.");
@@ -68,11 +68,11 @@ _startHuFlow: async function (sHu) {
         const ibd = hu.HandlingUnitReferenceDocument;
         if (!ibd) throw new Error("IBD missing inside HU response");
 
-        console.log("📦 IBD extracted:", ibd);
+        console.log("IBD extracted:", ibd);
         oVM.setProperty("/ibd", ibd); // raw number (if you want it)
 
         // --------------------------
-        // 2️⃣ FETCH INBOUND DELIVERY ITEMS
+        // 2️ FETCH INBOUND DELIVERY ITEMS
         // --------------------------
         const ibdItems = await this._fetchInboundDelivery(ibd);
         if (!ibdItems || ibdItems.length === 0) {
@@ -87,11 +87,11 @@ _startHuFlow: async function (sHu) {
         oVM.setProperty("/ibdDetails", firstItem);   // ⬅ this is what onPrintProgram expects
 
         // --------------------------
-        // 3️⃣ FETCH PO USING IBD → ReferenceSDDocument
+        // 3️ FETCH PO USING IBD → ReferenceSDDocument
         // --------------------------
         const poNumber = firstItem.ReferenceSDDocument;
         if (poNumber) {
-            console.log("🔎 Fetching PO:", poNumber);
+            console.log("Fetching PO:", poNumber);
 
             const poDetails = await this._fetchPO(poNumber);  // returns { purchaseOrder, firstItem }
 
@@ -99,13 +99,13 @@ _startHuFlow: async function (sHu) {
             oVM.setProperty("/poDetails", poDetails);
 
         } else {
-            console.warn("⚠ No PO found in IBD Item");
+            console.warn("No PO found in IBD Item");
         }
 
         // --------------------------
-        // 4️⃣ FETCH DOCUMENT FLOW
+        // 4️ FETCH DOCUMENT FLOW
         // --------------------------
-        console.log(`🔗 Calling DocFlow for IBD=${ibd}, Item=${firstItem.DeliveryDocumentItem}`);
+        console.log(`Calling DocFlow for IBD=${ibd}, Item=${firstItem.DeliveryDocumentItem}`);
 
         const docFlow = await this._fetchDocumentFlow(
             ibd,
@@ -120,18 +120,18 @@ _startHuFlow: async function (sHu) {
         oVM.setProperty("/docFlow", docFlow);
 
         // --------------------------
-        // 5️⃣ EXTRACT MATERIAL DOCUMENT FROM DOC FLOW
+        // 5️ EXTRACT MATERIAL DOCUMENT FROM DOC FLOW
         // --------------------------
         const matDocInfo = this._extractMaterialDocument(docFlow);
 
         if (!matDocInfo) {
-            console.warn("⚠ No Material Document found in Document Flow");
+            console.warn("No Material Document found in Document Flow");
             oVM.setProperty("/matDoc", null);
         } else {
-            console.log("📦 Material Doc Keys:", matDocInfo);
+            console.log("Material Doc Keys:", matDocInfo);
 
             // --------------------------
-            // 6️⃣ FETCH MATERIAL DOCUMENT ITEM
+            // 6️ FETCH MATERIAL DOCUMENT ITEM
             // --------------------------
 
 
@@ -142,14 +142,14 @@ _startHuFlow: async function (sHu) {
                 matDocInfo.MaterialDocumentItem
             );
 
-            console.log("📦 MATERIAL DOCUMENT ITEM OK:", matDocItem);
+            console.log("MATERIAL DOCUMENT ITEM OK:", matDocItem);
             oVM.setProperty("/matDoc", matDocItem);
         }
 
         sap.m.MessageToast.show("All data loaded successfully!");
 
     } catch (err) {
-        console.error("❌ Pipeline Error →", err);
+        console.error("Pipeline Error →", err);
         sap.m.MessageBox.error(err.message);
 
     } finally {
@@ -215,7 +215,7 @@ _fetchPO: async function (poNumber) {
         // Save to model (for debugging / later use)
         oVM.setProperty("/poDetails", result);
 
-        console.log("💾 Saved PO Details →", result);
+        console.log("Saved PO Details →", result);
 
         return result;
 
@@ -250,7 +250,7 @@ _fetchDocumentFlow: function (deliveryNumber, deliveryItem) {
 
                 console.log("DOC FLOW FULL ARRAY →", oData.results);
 
-                // ✅ RETURN FULL ARRAY
+                // RETURN FULL ARRAY
                 resolve(oData.results);
             },
             error: function (err) {
@@ -308,11 +308,11 @@ _extractMaterialDocument: function (docFlowOrArray) {
     // Normalize to array
     const arr = Array.isArray(docFlowOrArray) ? docFlowOrArray : [docFlowOrArray];
 
-    // 🔎 ONLY Material Document = Category 'R'
+    // ONLY Material Document = Category 'R'
     const entry = arr.find(e => e.SubsequentDocumentCategory == "R");
 
     if (!entry) {
-        console.warn("⚠️ No Material Document found based on SubsequentDocumentCategory = 'R'");
+        console.warn("No Material Document found based on SubsequentDocumentCategory = 'R'");
         return null;
     }
 
@@ -378,7 +378,7 @@ _fetchMaterialDocumentItem: async function (doc, year, item) {
         RawItem: itemData
     };
 
-    console.log("📦 FINAL MATERIAL DOC DATA →", combined);
+    console.log("FINAL MATERIAL DOC DATA →", combined);
 
     oVM.setProperty("/matDoc", combined);
 
@@ -506,7 +506,7 @@ onPrintProgram: async function () {
             }
         };
 
-        console.log("📦 FINAL CPI PAYLOAD →", payload);
+        console.log("FINAL CPI PAYLOAD →", payload);
 
         // ------------------------------------------
         // 3. CPI CALL
@@ -534,7 +534,7 @@ onPrintProgram: async function () {
             );
         }
 
-        console.log("✅ CPI Response:", raw);
+        console.log("CPI Response:", raw);
       sap.m.MessageBox.success(
     "Label printed successfully.",
     {
@@ -547,7 +547,7 @@ onPrintProgram: async function () {
 );
 
     } catch (err) {
-        console.error("❌ CPI Error:", err);
+        console.error("CPI Error:", err);
         sap.m.MessageBox.error(err.message);
     } finally {
         sap.ui.core.BusyIndicator.hide();
