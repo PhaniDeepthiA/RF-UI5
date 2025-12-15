@@ -19,12 +19,7 @@
       "csrfProtection": true
     },
 
- {
-      "source": "^/http/Bartender/Order$",
-      "target": "/dummy",
-      "authenticationType": "none",
-      "csrfProtection": false
-    },
+
     {
       "source": "^/http/(.*)$",
       "target": "$1",
