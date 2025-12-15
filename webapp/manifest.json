@@ -1,0 +1,251 @@
+{
+  "_version": "1.76.0",
+  "sap.app": {
+    "id": "inboundlabel",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{GR LABEL PRINT}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.20.0",
+      "toolsId": "d70dc40a-0597-420b-ad76-d453cb6f09bc"
+    },
+    "dataSources": {
+   
+      "purchaseOrderService": {
+        "uri": "/sap/opu/odata4/sap/api_purchaseorder_2/srvd_a2x/sap/purchaseorder/0001/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/purchaseOrderService/metadata.xml",
+          "odataVersion": "4.0"
+        }
+      },
+      "materialDocumentService": {
+        "uri": "/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/materialDocumentService/metadata.xml",
+          "odataVersion": "2.0"
+        }
+      },
+      "production_order_v2": {
+        "uri": "/sap/opu/odata/sap/API_PRODUCTION_ORDER_2_SRV",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/production_order_v2/metadata.xml",
+          "odataVersion": "2.0"
+        }
+      },
+      "whseGoodsReceiptService": {
+        "uri": "/sap/opu/odata4/sap/api_whse_inb_delivery_2/srvd_a2x/sap/warehouseinbounddelivery/0001/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/whseGoodsReceiptService/metadata.xml",
+          "odataVersion": "4.0"
+        }
+      },
+      "inboundDeliveryService": {
+        "uri": "/sap/opu/odata/sap/API_INBOUND_DELIVERY_SRV;v=0002/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/inboundDeliveryService/metadata.xml",
+          "odataVersion": "2.0"
+        }
+      },
+      "handlingUnitService": {
+        "uri": "/sap/opu/odata4/sap/api_handlingunit/srvd_a2x/sap/handlingunit/0001/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/handlingUnitService/metadata.xml",
+          "odataVersion": "4.0"
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": false,
+    "dependencies": {
+      "minUI5Version": "1.143.1",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "inboundlabel.i18n.i18n"
+        }
+      },
+     
+      "poService": {
+        "type": "sap.ui.model.odata.v4.ODataModel",
+        "dataSource": "purchaseOrderService",
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "groupId": "$auto"
+        }
+      },
+      "prodService": {
+        "dataSource": "production_order_v2",
+        "type": "sap.ui.model.odata.v2.ODataModel",
+        "settings": {
+          "defaultOperationMode": "Server",
+          "defaultCountMode": "Inline"
+        }
+      },
+      "matdocService": {
+        "type": "sap.ui.model.odata.v2.ODataModel",
+        "dataSource": "materialDocumentService",
+        "settings": {
+          "useBatch": false
+        }
+      },
+      "ibdService": {
+        "type": "sap.ui.model.odata.v2.ODataModel",
+        "dataSource": "inboundDeliveryService",
+        "settings": {
+          "defaultOperationMode": "Server",
+          "defaultCountMode": "Inline",
+          "useBatch": true
+        }
+      },
+      "whseGRService1": {
+        "type": "sap.ui.model.odata.v4.ODataModel",
+        "dataSource": "whseGoodsReceiptService",
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "groupId": "$auto"
+        }
+      },
+      "huService": {
+        "type": "sap.ui.model.odata.v4.ODataModel",
+        "dataSource": "handlingUnitService",
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "groupId": "$direct",
+          "updateGroupId": "$direct"
+        }
+      },
+     
+      "handlingUnitService": {
+        "dataSource": "handlingUnitService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "whseGoodsReceiptService": {
+        "dataSource": "whseGoodsReceiptService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "purchaseOrderService": {
+        "dataSource": "purchaseOrderService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "materialDocumentService": {
+        "dataSource": "materialDocumentService",
+        "preload": true,
+        "settings": {}
+      },
+      "production_order_v2": {
+        "dataSource": "production_order_v2",
+        "preload": true,
+        "settings": {}
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "transition": "slide",
+        "type": "View",
+        "viewType": "XML",
+        "path": "inboundlabel.view",
+        "async": true,
+        "viewPath": "inboundlabel.view"
+      },
+      "routes": [
+        {
+          "name": "RouteInboundLabel",
+          "pattern": ":?query:",
+          "target": [
+            "TargetInboundLabel"
+          ]
+        }
+      ],
+      "targets": {
+        "TargetInboundLabel": {
+          "id": "InboundLabel",
+          "name": "InboundLabel"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "inboundlabel.view.App",
+      "type": "XML",
+      "id": "App",
+      "async": true
+    }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "inboundlabel"
+  }
+}
+

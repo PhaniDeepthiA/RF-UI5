@@ -1,0 +1,70 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+
+specVersion: "4.0"
+metadata:
+  name: inboundlabel
+type: application
+framework:
+  name: SAPUI5
+  version: 1.143.0
+  libraries:
+    - name: sap.m
+    - name: sap.ui.core
+    - name: sap.ushell
+    - name: themelib_sap_horizon
+server:
+  customMiddleware:
+    - name: fiori-tools-appreload
+      afterMiddleware: compression
+      configuration:
+        port: 35729
+        path: webapp
+        delay: 300
+    - name: fiori-tools-preview
+      afterMiddleware: fiori-tools-appreload
+      configuration:
+        flp:
+          theme: sap_horizon
+    - name: fiori-tools-proxy
+      afterMiddleware: compression
+      configuration:
+        ignoreCertErrors: false # If set to true, certificate errors will be ignored. E.g. self-signed certificates will be accepted
+        backend:
+          - url: https://my424374.s4hana.cloud.sap
+            authenticationType: BasicAuthentication
+            destination: BTPTOS4HC_GR
+            path: /sap
+    - name: sap-fe-mockserver
+      beforeMiddleware: csp
+      configuration:
+        mountPath: /
+        services:
+          - urlPath: /http/Bartender/Order
+            metadataPath: ./webapp/localService/mainservice/metadata.xml
+            mockdataPath: ./webapp/localService/mainservice/data
+            generateMockData: true
+          - urlPath: /sap/opu/odata4/sap/api_purchaseorder_2/srvd_a2x/sap/purchaseorder/0001
+            metadataPath: ./webapp/localService/purchaseOrderService/metadata.xml
+            mockdataPath: ./webapp/localService/purchaseOrderService/data
+            generateMockData: true
+          - urlPath: /sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV
+            metadataPath: ./webapp/localService/materialDocumentService/metadata.xml
+            mockdataPath: ./webapp/localService/materialDocumentService/data
+            generateMockData: true
+          - urlPath: /sap/opu/odata/sap/API_PRODUCTION_ORDER_2_SRV
+            metadataPath: ./webapp/localService/production_order_v2/metadata.xml
+            mockdataPath: ./webapp/localService/production_order_v2/data
+            generateMockData: true
+          - urlPath: /sap/opu/odata4/sap/api_whse_inb_delivery_2/srvd_a2x/sap/warehouseinbounddelivery/0001
+            metadataPath: ./webapp/localService/whseGoodsReceiptService/metadata.xml
+            mockdataPath: ./webapp/localService/whseGoodsReceiptService/data
+            generateMockData: true
+          - urlPath: /sap/opu/odata4/sap/api_handlingunit/srvd_a2x/sap/handlingunit/0001
+            metadataPath: ./webapp/localService/handlingUnitService/metadata.xml
+            mockdataPath: ./webapp/localService/handlingUnitService/data
+            generateMockData: true
+          - urlPath: /sap/opu/odata/sap/API_INBOUND_DELIVERY_SRV;v=0002
+            metadataPath: ./webapp/localService/sap/metadata.xml
+            mockdataPath: ./webapp/localService/sap/data
+            generateMockData: true
+        annotations: []

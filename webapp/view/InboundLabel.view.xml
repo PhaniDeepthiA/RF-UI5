@@ -1,0 +1,100 @@
+<mvc:View controllerName="inboundlabel.controller.InboundLabel"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m">
+
+    <Page id="labelpage" title="Print Inbound Label">
+        <content>
+            <ScrollContainer height="100%" vertical="true" class="rfScrollContainer">
+                <VBox class="sapUiSmallMargin guiContainer">
+
+                    <!-- Main Vertical Form -->
+                    <VBox class="guiFormContainer">
+
+                        <!-- HANDLING UNIT -->
+                        <Label text="Handling Unit" class="guiLabel" labelFor="idHu"/>
+                        <Input id="idHu"
+                            value="{view>/HuData}"
+                            editable="true"
+                            width="100%"
+                            class="guiInput guiEditable"
+                            submit="onHuSubmit"
+                            change="onHuChange"
+                        />
+
+                        <!-- WAREHOUSE -->
+                        <Label text="Warehouse" class="guiLabel" labelFor="idWh"/>
+                        <Input id="idWh"
+                            value="{view>/Warehouse}"
+                            placeholder="Enter Warehouse"
+                            editable="true"
+                            width="100%"
+                            class="guiInput guiEditable"
+                        />
+
+                        <!-- IE -->
+                        <Label text="IE#" class="guiLabel" labelFor="idEI"/>
+                        <Input id="idEI"
+                            value="{view>/rfExtras/VLot}"
+                            maxLength="15"
+                            editable="true"
+                            width="100%"
+                            class="guiInput guiEditable"
+                        />
+
+                        <!-- CO -->
+                        <Label text="CO" class="guiLabel" labelFor="idCO"/>
+                        <Input id="idCO"
+                            value="{view>/rfExtras/CO}"
+                            editable="true"
+                            width="100%"
+                            class="guiInput guiEditable"
+                        />
+
+                        <!-- Printer P -->
+                        <Label text="P:" class="guiLabel" labelFor="idP"/>
+                        <Input id="idP"
+                            value="{view>/rfExtras/P1}"
+                            editable="true"
+                            width="100%"
+                            class="guiInput guiEditable"
+                        />
+
+                        <!-- Printer F -->
+                        <Label text="F:" class="guiLabel" labelFor="idF"/>
+                        <Input id="idF"
+                            value="{view>/rfExtras/F1}"
+                            editable="true"
+                            width="100%"
+                            class="guiInput guiEditable"
+                        />
+
+                        <!-- ACTION BUTTONS -->
+                        <HBox class="sapUiMediumMargin"
+                            justifyContent="Center"
+                            alignItems="Center"
+                            width="100%"
+                            >
+
+                            <Button text="F2 Clr"
+                                width="8rem"
+                                type="Default"
+                                press="onChangeData"
+                                class="guiBtn guiBtnDef actionBtn"/>
+
+                            <Button text="F9-PRGR"
+                                width="8rem"
+                                type="Emphasized"
+                                press="onPrintProgram"
+                                class="guiBtn guiBtnDef actionBtn prgrBtn"/>
+                        </HBox>
+
+                        <!-- LOADER -->
+                        <BusyIndicator visible="{view>/isLoading}" class="sapUiMediumMarginTop"/>
+
+                    </VBox>
+                </VBox>
+            </ScrollContainer>
+        </content>
+    </Page>
+
+</mvc:View>

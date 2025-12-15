@@ -1,0 +1,55 @@
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+
+  "routes": [
+    {
+      "source": "^/sap/opu/odata4/(.*)$",
+      "target": "/sap/opu/odata4/$1",
+      "destination": "BTPTOS4HC_GR",
+      "authenticationType": "xsuaa",
+      "csrfProtection": false
+    },
+
+      {
+      "source": "^/sap/opu/odata/(.*)$",
+      "target": "/sap/opu/odata/$1",
+      "destination": "BTPTOS4HC_GR",
+      "authenticationType": "xsuaa",
+      "csrfProtection": true
+    },
+
+ {
+      "source": "^/http/Bartender/Order$",
+      "target": "/dummy",
+      "authenticationType": "none",
+      "csrfProtection": false
+    },
+    {
+      "source": "^/http/(.*)$",
+      "target": "$1",
+      "destination": "CPI_HU_LABEL",
+      "authenticationType": "xsuaa",
+      "csrfProtection": false
+    },
+
+    {
+      "source": "^/resources/(.*)$",
+      "target": "/resources/$1",
+      "authenticationType": "none",
+      "destination": "ui5"
+    },
+    {
+      "source": "^/test-resources/(.*)$",
+      "target": "/test-resources/$1",
+      "authenticationType": "none",
+      "destination": "ui5"
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa"
+    }
+  ]
+}

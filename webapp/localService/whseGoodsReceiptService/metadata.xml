@@ -1,0 +1,700 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_COMMUNICATION',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.Communication.v1" Alias="Communication"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_PERSONALDATA',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.PersonalData.v1" Alias="PersonalData"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_ANALYTICS',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.Analytics.v1" Alias="Analytics"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_AGGREGATION',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="Org.OData.Aggregation.V1" Alias="SAP__aggregation"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_CAPABILITIES',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="Org.OData.Capabilities.V1" Alias="SAP__capabilities"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_CODELIST',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.CodeList.v1" Alias="SAP__CodeList"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_COMMON',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.Common.v1" Alias="SAP__common"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_CORE',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="Org.OData.Core.V1" Alias="SAP__core"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_HIERARCHY',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.Hierarchy.v1" Alias="SAP__hierarchy"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_HTML5',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.HTML5.v1" Alias="SAP__HTML5"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_MEASURES',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="Org.OData.Measures.V1" Alias="SAP__measures"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_ODM',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.ODM.v1" Alias="SAP__ODM"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_PDF',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.PDF.v1" Alias="SAP__PDF"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_SESSION',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.Session.v1" Alias="SAP__session"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_UI',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.UI.v1" Alias="SAP__UI"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_VALIDATION',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="Org.OData.Validation.V1" Alias="SAP__validation"/>
+    </edmx:Reference>
+    <edmx:DataServices>
+        <Schema Namespace="com.sap.gateway.srvd_a2x.api_whse_inbound_delivery_2.v0001" Alias="SAP__self">
+            <Annotation Term="SAP__core.SchemaVersion" String="1.3.4"/>
+            <EntityType Name="WhseInboundDeliveryItemType">
+                <Key>
+                    <PropertyRef Name="EWMInboundDelivery"/>
+                    <PropertyRef Name="EWMInboundDeliveryItem"/>
+                </Key>
+                <Property Name="EWMInboundDelivery" Type="Edm.String" Nullable="false" MaxLength="35"/>
+                <Property Name="EWMInboundDeliveryItem" Type="Edm.String" Nullable="false" MaxLength="10"/>
+                <Property Name="EWMWarehouse" Type="Edm.String" Nullable="false" MaxLength="4"/>
+                <Property Name="EWMDeliveryDocumentCategory" Type="Edm.String" Nullable="false" MaxLength="3"/>
+                <Property Name="EWMInboundDeliveryItemCategory" Type="Edm.String" Nullable="false" MaxLength="3"/>
+                <Property Name="EWMInboundDeliveryItemType" Type="Edm.String" Nullable="false" MaxLength="4"/>
+                <Property Name="Product" Type="Edm.String" Nullable="false" MaxLength="40"/>
+                <Property Name="ProductExternalID" Type="Edm.String" Nullable="false" MaxLength="40"/>
+                <Property Name="Batch" Type="Edm.String" Nullable="false" MaxLength="10"/>
+                <Property Name="EWMBatchBySupplierPlanned" Type="Edm.String" Nullable="false" MaxLength="15"/>
+                <Property Name="CountryOfOrigin" Type="Edm.String" Nullable="false" MaxLength="3"/>
+                <Property Name="ProductQuantity" Type="Edm.Decimal" Nullable="false" Precision="31" Scale="14"/>
+                <Property Name="QuantityUnit" Type="Edm.String" Nullable="false" MaxLength="3"/>
+                <Property Name="EWMInbDelivItmQuantitySAPCode" Type="Edm.String" Nullable="false" MaxLength="3"/>
+                <Property Name="EWMInbDelivItmQuantityISOCode" Type="Edm.String" Nullable="false" MaxLength="3"/>
+                <Property Name="StagingAreaGroup" Type="Edm.String" Nullable="false" MaxLength="4"/>
+                <Property Name="StagingArea" Type="Edm.String" Nullable="false" MaxLength="4"/>
+                <Property Name="StagingBay" Type="Edm.String" Nullable="false" MaxLength="18"/>
+                <Property Name="GoodsReceiptStatus" Type="Edm.String" Nullable="false" MaxLength="1"/>
+                <Property Name="PlanningPutawayStatus" Type="Edm.String" Nullable="false" MaxLength="1"/>
+                <Property Name="PutawayStatus" Type="Edm.String" Nullable="false" MaxLength="1"/>
+                <Property Name="CompletionStatus" Type="Edm.String" Nullable="false" MaxLength="1"/>
+                <Property Name="WarehouseProcessType" Type="Edm.String" Nullable="false" MaxLength="4"/>
+                <Property Name="GoodsMovementBin" Type="Edm.String" Nullable="false" MaxLength="18"/>
+                <Property Name="EWMProductionSupplyArea" Type="Edm.String" Nullable="false" MaxLength="15"/>
+                <Property Name="EWMDelivLastChangeUTCDateTime" Type="Edm.DateTimeOffset"/>
+                <Property Name="EntitledToDisposeParty" Type="Edm.String" Nullable="false" MaxLength="10"/>
+                <Property Name="EWMStockUsage" Type="Edm.String" Nullable="false" MaxLength="1"/>
+                <Property Name="EWMStockType" Type="Edm.String" Nullable="false" MaxLength="2"/>
+                <Property Name="EWMStockOwner" Type="Edm.String" Nullable="false" MaxLength="10"/>
+                <Property Name="DeliveryItemStockTypeDetnCode" Type="Edm.String" Nullable="false" MaxLength="1"/>
+                <Property Name="WBSElementInternalID" Type="Edm.String" Nullable="false" MaxLength="8"/>
+                <Property Name="WBSElementExternalID" Type="Edm.String" Nullable="false" MaxLength="24"/>
+                <Property Name="SpecialStockIdfgSalesOrder" Type="Edm.String" Nullable="false" MaxLength="10"/>
+                <Property Name="SpecialStockIdfgSalesOrderItem" Type="Edm.String" Nullable="false" MaxLength="6"/>
+                <Property Name="PurchasingDocument" Type="Edm.String" Nullable="false" MaxLength="10"/>
+                <Property Name="PurchasingDocumentItem" Type="Edm.String" Nullable="false" MaxLength="5"/>
+                <Property Name="ManufacturingOrder" Type="Edm.String" Nullable="false" MaxLength="12"/>
+                <Property Name="SAP__Messages" Type="Collection(com.sap.gateway.srvd_a2x.api_whse_inbound_delivery_2.v0001.SAP__Message)" Nullable="false"/>
+                <NavigationProperty Name="_WhseInbDeliveryHead" Type="com.sap.gateway.srvd_a2x.api_whse_inbound_delivery_2.v0001.WhseInboundDeliveryHeadType" Nullable="false" Partner="_WhseInbDeliveryItem">
+                    <ReferentialConstraint Property="EWMInboundDelivery" ReferencedProperty="EWMInboundDelivery"/>
+                </NavigationProperty>
+                <NavigationProperty Name="_WhseInbDeliveryItemSerialNo" Type="Collection(com.sap.gateway.srvd_a2x.api_whse_inbound_delivery_2.v0001.WhseInbDelivItemSerialNumberType)" Partner="_WhseInbDeliveryItem">
+                    <OnDelete Action="Cascade"/>
+                </NavigationProperty>
+            </EntityType>
+            <EntityType Name="WhseInbDelivItemSerialNumberType">
+                <Key>
+                    <PropertyRef Name="EWMInboundDelivery"/>
+                    <PropertyRef Name="EWMInboundDeliveryItem"/>
+                    <PropertyRef Name="EWMSerialNumber"/>
+                </Key>
+                <Property Name="EWMInboundDelivery" Type="Edm.String" Nullable="false" MaxLength="35"/>
+                <Property Name="EWMInboundDeliveryItem" Type="Edm.String" Nullable="false" MaxLength="10"/>
+                <Property Name="EWMSerialNumber" Type="Edm.String" Nullable="false" MaxLength="30"/>
+                <NavigationProperty Name="_WhseInbDeliveryItem" Type="com.sap.gateway.srvd_a2x.api_whse_inbound_delivery_2.v0001.WhseInboundDeliveryItemType" Nullable="false" Partner="_WhseInbDeliveryItemSerialNo">
+                    <ReferentialConstraint Property="EWMInboundDelivery" ReferencedProperty="EWMInboundDelivery"/>
+                    <ReferentialConstraint Property="EWMInboundDeliveryItem" ReferencedProperty="EWMInboundDeliveryItem"/>
+                </NavigationProperty>
+            </EntityType>
+            <EntityType Name="WhseInboundDeliveryHeadType">
+                <Key>
+                    <PropertyRef Name="EWMInboundDelivery"/>
+                </Key>
+                <Property Name="EWMInboundDelivery" Type="Edm.String" Nullable="false" MaxLength="35"/>
+                <Property Name="EWMWarehouse" Type="Edm.String" Nullable="false" MaxLength="4"/>
+                <Property Name="EWMDeliveryDocumentCategory" Type="Edm.String" Nullable="false" MaxLength="3"/>
+                <Property Name="EWMDeliveryDocumentType" Type="Edm.String" Nullable="false" MaxLength="4"/>
+                <Property Name="ShipFromParty" Type="Edm.String" Nullable="false" MaxLength="10"/>
+                <Property Name="ShipFromPartyName" Type="Edm.String" Nullable="false" MaxLength="40"/>
+                <Property Name="Carrier" Type="Edm.String" Nullable="false" MaxLength="10"/>
+                <Property Name="CarrierName" Type="Edm.String" Nullable="false" MaxLength="40"/>
+                <Property Name="AdvancedShippingNotification" Type="Edm.String" Nullable="false" MaxLength="35"/>
+                <Property Name="PlannedDeliveryUTCDateTime" Type="Edm.DateTimeOffset"/>
+                <Property Name="ReceivingOffice" Type="Edm.String" Nullable="false" MaxLength="20"/>
+                <Property Name="EWMDelivLastChangeUTCDateTime" Type="Edm.DateTimeOffset"/>
+                <Property Name="SAP__Messages" Type="Collection(com.sap.gateway.srvd_a2x.api_whse_inbound_delivery_2.v0001.SAP__Message)" Nullable="false"/>
+                <NavigationProperty Name="_WhseInbDeliveryItem" Type="Collection(com.sap.gateway.srvd_a2x.api_whse_inbound_delivery_2.v0001.WhseInboundDeliveryItemType)" Partner="_WhseInbDeliveryHead">
+                    <OnDelete Action="Cascade"/>
+                </NavigationProperty>
+            </EntityType>
+            <ComplexType Name="SAP__Message">
+                <Property Name="code" Type="Edm.String" Nullable="false"/>
+                <Property Name="message" Type="Edm.String" Nullable="false"/>
+                <Property Name="target" Type="Edm.String"/>
+                <Property Name="additionalTargets" Type="Collection(Edm.String)" Nullable="false"/>
+                <Property Name="transition" Type="Edm.Boolean" Nullable="false"/>
+                <Property Name="numericSeverity" Type="Edm.Byte" Nullable="false"/>
+                <Property Name="longtextUrl" Type="Edm.String"/>
+            </ComplexType>
+            <Action Name="PostGoodsReceipt" IsBound="true">
+                <Parameter Name="_it" Type="com.sap.gateway.srvd_a2x.api_whse_inbound_delivery_2.v0001.WhseInboundDeliveryHeadType" Nullable="false"/>
+            </Action>
+            <Action Name="ReverseGoodsReceipt" IsBound="true">
+                <Parameter Name="_it" Type="com.sap.gateway.srvd_a2x.api_whse_inbound_delivery_2.v0001.WhseInboundDeliveryHeadType" Nullable="false"/>
+            </Action>
+            <Action Name="AdjustDeliveryItemQuantity" IsBound="true">
+                <Parameter Name="_it" Type="com.sap.gateway.srvd_a2x.api_whse_inbound_delivery_2.v0001.WhseInboundDeliveryItemType" Nullable="false"/>
+            </Action>
+            <EntityContainer Name="Container">
+                <EntitySet Name="WhseInbDelivItemSerialNumber" EntityType="com.sap.gateway.srvd_a2x.api_whse_inbound_delivery_2.v0001.WhseInbDelivItemSerialNumberType">
+                    <NavigationPropertyBinding Path="_WhseInbDeliveryItem" Target="WhseInboundDeliveryItem"/>
+                </EntitySet>
+                <EntitySet Name="WhseInboundDeliveryHead" EntityType="com.sap.gateway.srvd_a2x.api_whse_inbound_delivery_2.v0001.WhseInboundDeliveryHeadType">
+                    <NavigationPropertyBinding Path="_WhseInbDeliveryItem" Target="WhseInboundDeliveryItem"/>
+                </EntitySet>
+                <EntitySet Name="WhseInboundDeliveryItem" EntityType="com.sap.gateway.srvd_a2x.api_whse_inbound_delivery_2.v0001.WhseInboundDeliveryItemType">
+                    <NavigationPropertyBinding Path="_WhseInbDeliveryHead" Target="WhseInboundDeliveryHead"/>
+                    <NavigationPropertyBinding Path="_WhseInbDeliveryItemSerialNo" Target="WhseInbDelivItemSerialNumber"/>
+                </EntitySet>
+            </EntityContainer>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/EWMInboundDelivery">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Document Number"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/EWMInboundDeliveryItem">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsDigitSequence"/>
+                <Annotation Term="SAP__common.Label" String="Item Number"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/EWMWarehouse">
+                <Annotation Term="SAP__common.SAPObjectNodeTypeReference" String="Warehouse"/>
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Warehouse Number"/>
+                <Annotation Term="SAP__common.Heading" String="WhN"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Warehouse Number/Warehouse Complex"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=%2FSCWM%2FLGNUM"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/EWMDeliveryDocumentCategory">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Document Category"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/EWMInboundDeliveryItemCategory">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Item Category"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=%2FSCDL%2FDL_ITEMCAT"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/EWMInboundDeliveryItemType">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Item Type"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=%2FSCDL%2FDL_ITEMTYPE"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/Product">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Char"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Character field of length 40"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/ProductExternalID">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Char"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Character field of length 40"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/Batch">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Batch"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Batch Number"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=CHARG_D"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/EWMBatchBySupplierPlanned">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Supplier Batch"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Supplier Batch Number"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=LICHN"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/CountryOfOrigin">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Ctry/Reg. of Origin"/>
+                <Annotation Term="SAP__common.Heading" String="Origin"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Country/Region of Origin"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/ProductQuantity">
+                <Annotation Term="SAP__measures.Unit" Path="QuantityUnit"/>
+                <Annotation Term="SAP__common.Label" String="Quantity"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/QuantityUnit">
+                <Annotation Term="SAP__common.IsUnit"/>
+                <Annotation Term="SAP__common.Label" String="Base Unit of Measure"/>
+                <Annotation Term="SAP__common.Heading" String="BUn"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/EWMInbDelivItmQuantitySAPCode">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.Label" String="Internal SAP Code"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Unit of Measurement, Internal SAP Code (No Conversion)"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/EWMInbDelivItmQuantityISOCode">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="ISO Code"/>
+                <Annotation Term="SAP__common.Heading" String="ISO"/>
+                <Annotation Term="SAP__common.QuickInfo" String="ISO Code for Unit of Measurement"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=ISOCD_UNIT"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/StagingAreaGroup">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Staging Area Group"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=%2FSCWM%2FDE_STAREA_GR"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/StagingArea">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Staging Area"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=%2FSCWM%2FDE_STAREA"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/StagingBay">
+                <Annotation Term="SAP__common.SAPObjectNodeTypeReference" String="WarehouseStorageBin"/>
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Staging Bay"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=%2FSCWM%2FDE_STABAY"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/GoodsReceiptStatus">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Status Value"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=%2FSCDL%2FDL_STATUS_VALUE"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/PlanningPutawayStatus">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Status Value"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=%2FSCDL%2FDL_STATUS_VALUE"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/PutawayStatus">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Status Value"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=%2FSCDL%2FDL_STATUS_VALUE"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/CompletionStatus">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Status Value"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=%2FSCDL%2FDL_STATUS_VALUE"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/WarehouseProcessType">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Whse Process Type"/>
+                <Annotation Term="SAP__common.Heading" String="Proc. Type"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Warehouse Process Type"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=%2FSCWM%2FDE_PROCTY"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/GoodsMovementBin">
+                <Annotation Term="SAP__common.SAPObjectNodeTypeReference" String="WarehouseStorageBin"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Stor. Bin GM Posting"/>
+                <Annotation Term="SAP__common.Heading" String="Stor. Bin of Goods Mvt Posting"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Storage Bin of Goods Movement Posting"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=%2FSCWM%2FDL_GMBIN"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/EWMProductionSupplyArea">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="PSA"/>
+                <Annotation Term="SAP__common.Heading" String="Production Supply Area"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Production Supply Area (PSA)"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=%2FSCWM%2FDL_PSA"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/EWMDelivLastChangeUTCDateTime">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.Label" String="Short Time Stamp"/>
+                <Annotation Term="SAP__common.Heading" String="Short Form of Time Stamp"/>
+                <Annotation Term="SAP__common.QuickInfo" String="UTC Time Stamp in Short Form (YYYYMMDDhhmmss)"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=TZNTSTMPS"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/EntitledToDisposeParty">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Disposal Party"/>
+                <Annotation Term="SAP__common.Heading" String="Disposal"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Party Entitled to Dispose"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=%2FSCWM%2FDE_ENTITLED"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/EWMStockUsage">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Stock Usage"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/EWMStockType">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Stock Type"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/EWMStockOwner">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Character Field with Length 10"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/DeliveryItemStockTypeDetnCode">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Determin. Ind."/>
+                <Annotation Term="SAP__common.Heading" String="In."/>
+                <Annotation Term="SAP__common.QuickInfo" String="Value Determination Indicator"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=%2FSCDL%2FDL_INDICATOR"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/WBSElementInternalID">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsDigitSequence"/>
+                <Annotation Term="SAP__common.Label" String="WBS Internal ID"/>
+                <Annotation Term="SAP__common.Heading" String="WBS Elem"/>
+                <Annotation Term="SAP__common.QuickInfo" String="WBS Element"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=PS_S4_PSPNR"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/WBSElementExternalID">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="WBS Element"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Work Breakdown Structure Element (WBS Element) Edited"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=PS_POSID_EDIT"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/SpecialStockIdfgSalesOrder">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Stock Ident Header"/>
+                <Annotation Term="SAP__common.Heading" String="Special Stock Identification Header"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Special Stock Identification Header"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/SpecialStockIdfgSalesOrderItem">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsDigitSequence"/>
+                <Annotation Term="SAP__common.Label" String="Stock Ident Item"/>
+                <Annotation Term="SAP__common.Heading" String="Special Stock Identification Item"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Special Stock Identification Item"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/PurchasingDocument">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Purchasing Document"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/PurchasingDocumentItem">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsDigitSequence"/>
+                <Annotation Term="SAP__common.Label" String="Purchase Order Item"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/ManufacturingOrder">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Manufacturing Order"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Manufacturing Order ID"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType/_WhseInbDeliveryItemSerialNo">
+                <Annotation Term="SAP__common.Composition"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryItemType">
+                <Annotation Term="SAP__common.Label" String="Warehouse Inbound Delivery Item"/>
+                <Annotation Term="SAP__common.Messages" Path="SAP__Messages"/>
+            </Annotations>
+            <Annotations Target="SAP__self.Container/WhseInboundDeliveryItem">
+                <Annotation Term="SAP__capabilities.SearchRestrictions">
+                    <Record>
+                        <PropertyValue Property="Searchable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.UpdateRestrictions">
+                    <Record>
+                        <PropertyValue Property="DeltaUpdateSupported" Bool="true"/>
+                        <PropertyValue Property="NonUpdatableNavigationProperties">
+                            <Collection>
+                                <PropertyPath>_WhseInbDeliveryHead</PropertyPath>
+                                <PropertyPath>_WhseInbDeliveryItemSerialNo</PropertyPath>
+                            </Collection>
+                        </PropertyValue>
+                        <PropertyValue Property="QueryOptions">
+                            <Record>
+                                <PropertyValue Property="SelectSupported" Bool="true"/>
+                            </Record>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.DeepUpdateSupport">
+                    <Record>
+                        <PropertyValue Property="ContentIDSupported" Bool="true"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.InsertRestrictions">
+                    <Record>
+                        <PropertyValue Property="Insertable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.DeleteRestrictions">
+                    <Record>
+                        <PropertyValue Property="Deletable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__core.OptimisticConcurrency">
+                    <Collection>
+                        <PropertyPath>EWMDelivLastChangeUTCDateTime</PropertyPath>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.FilterRestrictions">
+                    <Record>
+                        <PropertyValue Property="FilterExpressionRestrictions">
+                            <Collection>
+                                <Record>
+                                    <PropertyValue Property="Property" PropertyPath="ProductQuantity"/>
+                                    <PropertyValue Property="AllowedExpressions" String="MultiValue"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="SAP__self.Container">
+                <Annotation Term="SAP__CodeList.UnitsOfMeasure">
+                    <Record>
+                        <PropertyValue Property="Url" String="../../../../default/iwbep/common/0001/$metadata"/>
+                        <PropertyValue Property="CollectionPath" String="UnitsOfMeasure"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__common.ApplyMultiUnitBehaviorForSortingAndFiltering" Bool="true"/>
+                <Annotation Term="SAP__capabilities.FilterFunctions">
+                    <Collection>
+                        <String>eq</String>
+                        <String>ne</String>
+                        <String>gt</String>
+                        <String>ge</String>
+                        <String>lt</String>
+                        <String>le</String>
+                        <String>and</String>
+                        <String>or</String>
+                        <String>contains</String>
+                        <String>startswith</String>
+                        <String>endswith</String>
+                        <String>any</String>
+                        <String>all</String>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.SupportedFormats">
+                    <Collection>
+                        <String>application/json</String>
+                        <String>application/pdf</String>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="SAP__PDF.Features">
+                    <Record>
+                        <PropertyValue Property="DocumentDescriptionReference" String="../../../../default/iwbep/common/0001/$metadata"/>
+                        <PropertyValue Property="DocumentDescriptionCollection" String="MyDocumentDescriptions"/>
+                        <PropertyValue Property="ArchiveFormat" Bool="true"/>
+                        <PropertyValue Property="Border" Bool="true"/>
+                        <PropertyValue Property="CoverPage" Bool="true"/>
+                        <PropertyValue Property="FitToPage" Bool="true"/>
+                        <PropertyValue Property="FontName" Bool="true"/>
+                        <PropertyValue Property="FontSize" Bool="true"/>
+                        <PropertyValue Property="HeaderFooter" Bool="true"/>
+                        <PropertyValue Property="IANATimezoneFormat" Bool="true"/>
+                        <PropertyValue Property="Margin" Bool="true"/>
+                        <PropertyValue Property="Padding" Bool="true"/>
+                        <PropertyValue Property="ResultSizeDefault" Int="20000"/>
+                        <PropertyValue Property="ResultSizeMaximum" Int="20000"/>
+                        <PropertyValue Property="Signature" Bool="true"/>
+                        <PropertyValue Property="TextDirectionLayout" Bool="true"/>
+                        <PropertyValue Property="Treeview" Bool="true"/>
+                        <PropertyValue Property="UploadToFileShare" Bool="true"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.KeyAsSegmentSupported"/>
+                <Annotation Term="SAP__capabilities.AsynchronousRequestsSupported"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInbDelivItemSerialNumberType/EWMInboundDelivery">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Document Number"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInbDelivItemSerialNumberType/EWMInboundDeliveryItem">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsDigitSequence"/>
+                <Annotation Term="SAP__common.Label" String="Item Number"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInbDelivItemSerialNumberType/EWMSerialNumber">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Serial Number"/>
+                <Annotation Term="SAP__common.Heading" String="Serial No."/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInbDelivItemSerialNumberType">
+                <Annotation Term="SAP__common.Label" String="Whse Inb Delivery Item Serial Number"/>
+            </Annotations>
+            <Annotations Target="SAP__self.Container/WhseInbDelivItemSerialNumber">
+                <Annotation Term="SAP__capabilities.SearchRestrictions">
+                    <Record>
+                        <PropertyValue Property="Searchable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.InsertRestrictions">
+                    <Record>
+                        <PropertyValue Property="Insertable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.DeleteRestrictions">
+                    <Record>
+                        <PropertyValue Property="Deletable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.UpdateRestrictions">
+                    <Record>
+                        <PropertyValue Property="Updatable" Bool="false"/>
+                        <PropertyValue Property="NonUpdatableNavigationProperties">
+                            <Collection>
+                                <PropertyPath>_WhseInbDeliveryItem</PropertyPath>
+                            </Collection>
+                        </PropertyValue>
+                        <PropertyValue Property="QueryOptions">
+                            <Record>
+                                <PropertyValue Property="SelectSupported" Bool="true"/>
+                            </Record>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryHeadType/EWMInboundDelivery">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Document Number"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryHeadType/EWMWarehouse">
+                <Annotation Term="SAP__common.SAPObjectNodeTypeReference" String="Warehouse"/>
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Warehouse Number"/>
+                <Annotation Term="SAP__common.Heading" String="WhN"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Warehouse Number/Warehouse Complex"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=%2FSCWM%2FLGNUM"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryHeadType/EWMDeliveryDocumentCategory">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Document Category"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryHeadType/EWMDeliveryDocumentType">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Document Type"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=%2FSCDL%2FDL_DOCTYPE"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryHeadType/ShipFromParty">
+                <Annotation Term="SAP__common.SAPObjectNodeTypeReference" String="BusinessPartner"/>
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Business Partner"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Business Partner Number"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=BU_PARTNER"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryHeadType/ShipFromPartyName">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.Label" String="Ship-From Party Name"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryHeadType/Carrier">
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Business Partner"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Business Partner Number"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=BU_PARTNER"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryHeadType/CarrierName">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.Label" String="Carrier Name"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryHeadType/AdvancedShippingNotification">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Document Number"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryHeadType/PlannedDeliveryUTCDateTime">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.Label" String="Planned Delivery Date"/>
+                <Annotation Term="SAP__common.QuickInfo" String="Planned Delivery Date/Time"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryHeadType/ReceivingOffice">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.IsUpperCase"/>
+                <Annotation Term="SAP__common.Label" String="Location Number"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryHeadType/EWMDelivLastChangeUTCDateTime">
+                <Annotation Term="SAP__core.Computed"/>
+                <Annotation Term="SAP__common.Label" String="Short Time Stamp"/>
+                <Annotation Term="SAP__common.Heading" String="Short Form of Time Stamp"/>
+                <Annotation Term="SAP__common.QuickInfo" String="UTC Time Stamp in Short Form (YYYYMMDDhhmmss)"/>
+                <Annotation Term="SAP__common.DocumentationRef" String="urn:sap-com:documentation:key?=type=DE&amp;id=TZNTSTMPS"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryHeadType/_WhseInbDeliveryItem">
+                <Annotation Term="SAP__common.Composition"/>
+            </Annotations>
+            <Annotations Target="SAP__self.WhseInboundDeliveryHeadType">
+                <Annotation Term="SAP__common.Label" String="Warehouse Inbound Delivery Head"/>
+                <Annotation Term="SAP__common.Messages" Path="SAP__Messages"/>
+            </Annotations>
+            <Annotations Target="SAP__self.Container/WhseInboundDeliveryHead">
+                <Annotation Term="SAP__capabilities.SearchRestrictions">
+                    <Record>
+                        <PropertyValue Property="Searchable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.UpdateRestrictions">
+                    <Record>
+                        <PropertyValue Property="DeltaUpdateSupported" Bool="true"/>
+                        <PropertyValue Property="NonUpdatableNavigationProperties">
+                            <Collection>
+                                <PropertyPath>_WhseInbDeliveryItem</PropertyPath>
+                            </Collection>
+                        </PropertyValue>
+                        <PropertyValue Property="QueryOptions">
+                            <Record>
+                                <PropertyValue Property="SelectSupported" Bool="true"/>
+                            </Record>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.DeepUpdateSupport">
+                    <Record>
+                        <PropertyValue Property="ContentIDSupported" Bool="true"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.InsertRestrictions">
+                    <Record>
+                        <PropertyValue Property="Insertable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__capabilities.DeleteRestrictions">
+                    <Record>
+                        <PropertyValue Property="Deletable" Bool="false"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="SAP__core.OptimisticConcurrency">
+                    <Collection>
+                        <PropertyPath>EWMDelivLastChangeUTCDateTime</PropertyPath>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>
