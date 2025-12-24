@@ -81,7 +81,7 @@
                                 press="onChangeData"
                                 class="guiBtn guiBtnDef actionBtn"/>
 
-                            <Button text="F9-PRGR"
+                            <Button text="F9-PrintHU"
                                 width="8rem"
                                 type="Emphasized"
                                 press="onPrintProgram"

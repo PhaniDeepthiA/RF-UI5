@@ -407,20 +407,22 @@ _fetchMaterialDocumentItem: async function (doc, year, item) {
         //---------------------------------------------------------------------
         // CLEAR BUTTON
         //---------------------------------------------------------------------
- onChangeData: function () {
+        onChangeData: function () {
             const oVM = this.getView().getModel("view");
 
             oVM.setProperty("/HuData", "");
             oVM.setProperty("/rfExtras", { CO: "", VLot: "", P1: "", F1: "" });
             oVM.setProperty("/agg", {});
 
-            MessageToast.show("Cleared");
+            // MessageToast.show("Cleared");
+
+          //  this.onpresss()
+            
         },
+
 
 onPrintProgram: async function () {
     try {
-        sap.ui.core.BusyIndicator.show(0);
-
         const oVM = this.getView().getModel("view");
         const data = oVM.getData();
 
@@ -436,68 +438,56 @@ onPrintProgram: async function () {
         if (!data.docFlow) return sap.m.MessageBox.error("Document Flow missing");
         if (!data.matDoc) return sap.m.MessageBox.error("Material Document missing");
 
+        sap.ui.core.BusyIndicator.show(0);
+
         const hu = data.huDetails;
         const ibd = data.ibdDetails;
         const po = data.poDetails.purchaseOrder;
         const poItem = data.poDetails.firstItem;
-        const docFlow = data.docFlow;
         const mat = data.matDoc;
 
-        // HU Item info (if present)
         const huItem = hu._HandlingUnitItem?.[0] || {};
-          
-        
-        // -----------------------------
-        // 2. BUILD DYNAMIC PAYLOAD
-        // -----------------------------
 
+        // -----------------------------
+        // 2. BUILD PAYLOAD
+        // -----------------------------
         const payload = {
-            "Order_HU": {
+            Order_HU: {
                 HU: data.HuData,
                 barcode: data.HuData,
 
-                // ---------------- HU API ----------------
                 Pack_Material: hu.PackagingMaterial || "",
                 Product: huItem.Material || "",
                 Prod_Desc: poItem.PurchaseOrderItemText || "",
-                
-                Hu_Quantity: huItem.HandlingUnitQuantity,
+
+                Hu_Quantity: huItem.HandlingUnitQuantity || "",
                 Uom: huItem.HandlingUnitQuantityUnit || "",
                 St_Type: hu.StorageType || "",
                 Storage_Location: hu.StorageLocation || "",
                 Storage_Bin: hu.StorageBin || "",
                 Vendor_Code: po.Supplier || "",
 
-                // -------------- IBD DETAILS --------------
                 Delivery: ibd.DeliveryDocument || "",
                 Delivery_Item: ibd.DeliveryDocumentItem || "",
-               
+
                 Exp_date: ibd.ShelfLifeExpirationDate || "",
                 Manufacture_date: ibd.ManufactureDate || "",
                 Batch: ibd.Batch || "",
 
-                Stock_Category:poItem?.StockType === "X" ? "X" : "",
+                Stock_Category: poItem?.StockType === "X" ? "X" : "",
                 Special_stock: poItem?.PurchaseOrderCategory === "K" ? "K" : "",
 
-                // ---------------- PO DETAILS ----------------
                 Purchase_Order: po.PurchaseOrder || "",
                 PO_Item: poItem.PurchaseOrderItem || "",
                 Vendor_Part: poItem.ManufacturerMaterial || "",
-               
 
-                //----------------Prod Order ----------------
+                Prod_Order: "",
+                Int_Serialno: "",
 
-                Prod_Order : "",
-                Int_Serialno : "",
+                GR: mat.DocumentNo || "",
+                GR_Qty: mat.QuantityInBaseUnit || "",
+                GR_Date: mat.CreationDate || "",
 
-                // ---------------- DOC FLOW ----------------
-                  GR: mat.DocumentNo || "",
-
-                // ---------------- MATERIAL DOCUMENT ----------------
-                 GR_Qty: mat.QuantityInBaseUnit || "",
-                 GR_Date: mat.CreationDate || "",
-
-                // ---------------- UI MANUAL ENTRIES ----------------
                 CO: data.rfExtras.CO,
                 IE: data.rfExtras.VLot,
                 Label_Format: data.rfExtras.P1,
@@ -506,52 +496,47 @@ onPrintProgram: async function () {
             }
         };
 
-        console.log("FINAL CPI PAYLOAD →", payload);
+        console.log("📦 FINAL CPI PAYLOAD →", payload);
 
-        // ------------------------------------------
-        // 3. CPI CALL
-        // ------------------------------------------
-        const reqId = "UI-" + Date.now();
+        // -----------------------------
+        // 3. CPI CALL (CORRECT FORMAT)
+        // -----------------------------
+        const sBaseUrl = sap.ui.require.toUrl("inboundlabel"); // app namespace
+        const sUrl = sBaseUrl + "/http/Bartender/Order";
 
-        const res = await fetch("/http/Bartender/Order", {
+        const oResponse = await fetch(sUrl, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json, text/plain, */*",
-                "x-request-id": reqId
+                "Content-Type": "application/json"
             },
             body: JSON.stringify(payload)
         });
 
-        const raw = await res.text();
-
-        if (!res.ok) {
-            let parsed = raw;
-            try { parsed = JSON.parse(raw); } catch (_) {}
-            throw new Error(
-                `CPI returned ${res.status} ${res.statusText}\n\n` +
-                JSON.stringify(parsed, null, 2)
+        if (oResponse.ok) {
+            sap.m.MessageBox.success(
+                "Label printed successfully.",
+                {
+                    title: "Print Successful",
+                    onClose: () => {
+                        this.onChangeData(); // clear AFTER success
+                    }
+                }
             );
+        } else {
+            const errText = await oResponse.text();
+            console.error("❌ CPI Error:", errText);
+            sap.m.MessageBox.error(errText || "Error calling CPI");
         }
-
-        console.log("CPI Response:", raw);
-      sap.m.MessageBox.success(
-    "Label printed successfully.",
-    {
-        title: "Print Successful",
-        onClose: () => {
-            // Clear everything only AFTER user confirms
-            this.onChangeData();
-        }
-    }
-);
 
     } catch (err) {
-        console.error("CPI Error:", err);
+        console.error("❌ CPI Exception:", err);
         sap.m.MessageBox.error(err.message);
     } finally {
         sap.ui.core.BusyIndicator.hide();
     }
 },
-    });
+
+ });
+
+    
 });

@@ -19,12 +19,11 @@
       "csrfProtection": true
     },
 
-
     {
       "source": "^/http/(.*)$",
-      "target": "$1",
+      "target": "/http/$1",
       "destination": "CPI_HU_LABEL",
-      "authenticationType": "xsuaa",
+      "authenticationType": "none",
       "csrfProtection": false
     },
 
