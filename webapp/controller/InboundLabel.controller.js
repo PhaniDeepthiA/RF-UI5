@@ -89,18 +89,33 @@ _startHuFlow: async function (sHu) {
         // --------------------------
         // 3️ FETCH PO USING IBD → ReferenceSDDocument
         // --------------------------
-        const poNumber = firstItem.ReferenceSDDocument;
-        if (poNumber) {
-            console.log("Fetching PO:", poNumber);
+      const isProdOrder = firstItem.DeliveryDocumentItemCategory === "DIGN";
+oVM.setProperty("/isProdOrder", isProdOrder);
 
-            const poDetails = await this._fetchPO(poNumber);  // returns { purchaseOrder, firstItem }
+if (isProdOrder) {
+    // Production Order — NO API CALL
+    const prodDetails = {
+        OrderID: firstItem.OrderID,
+        OrderItem: firstItem.OrderItem
+    };
 
-            console.log("PO OK →", poDetails);
-            oVM.setProperty("/poDetails", poDetails);
+    console.log("Production Order detected →", prodDetails);
+    oVM.setProperty("/prodOrderDetails", prodDetails);
 
-        } else {
-            console.warn("No PO found in IBD Item");
-        }
+} else {
+    // Purchase Order — EXISTING FLOW
+    const poNumber = firstItem.ReferenceSDDocument;
+
+    if (poNumber) {
+        console.log("Fetching PO:", poNumber);
+
+        const poDetails = await this._fetchPO(poNumber);
+        oVM.setProperty("/poDetails", poDetails);
+
+    } else {
+        console.warn("No PO found in IBD Item");
+    }
+}
 
         // --------------------------
         // 4️ FETCH DOCUMENT FLOW
@@ -434,7 +449,7 @@ onPrintProgram: async function () {
         if (!data.rfExtras.VLot) return sap.m.MessageBox.error("Enter EI#");
         if (!data.huDetails) return sap.m.MessageBox.error("HU details missing — fetch HU first.");
         if (!data.ibdDetails) return sap.m.MessageBox.error("Inbound Delivery missing");
-        if (!data.poDetails) return sap.m.MessageBox.error("PO details missing");
+        //if (!data.poDetails) return sap.m.MessageBox.error("PO details missing");
         if (!data.docFlow) return sap.m.MessageBox.error("Document Flow missing");
         if (!data.matDoc) return sap.m.MessageBox.error("Material Document missing");
 
@@ -442,8 +457,11 @@ onPrintProgram: async function () {
 
         const hu = data.huDetails;
         const ibd = data.ibdDetails;
-        const po = data.poDetails.purchaseOrder;
-        const poItem = data.poDetails.firstItem;
+       const isProdOrder = data.isProdOrder === true;
+
+const po = isProdOrder ? null : data.poDetails?.purchaseOrder;
+const poItem = isProdOrder ? null : data.poDetails?.firstItem;
+const prod = isProdOrder ? data.prodOrderDetails : null;
         const mat = data.matDoc;
 
         const huItem = hu._HandlingUnitItem?.[0] || {};
@@ -451,50 +469,64 @@ onPrintProgram: async function () {
         // -----------------------------
         // 2. BUILD PAYLOAD
         // -----------------------------
-        const payload = {
-            Order_HU: {
-                HU: data.HuData,
-                barcode: data.HuData,
+    const payload = {
+    Order_HU: {
+        HU: data.HuData,
+        barcode: data.HuData,
 
-                Pack_Material: hu.PackagingMaterial || "",
-                Product: huItem.Material || "",
-                Prod_Desc: poItem.PurchaseOrderItemText || "",
+        // HU
+        Pack_Material: hu.PackagingMaterial || "",
+        Product: huItem.Material || "",
+        Prod_Desc: isProdOrder
+            ? huItem.MaterialDescription || ""
+            : poItem?.PurchaseOrderItemText || "",
 
-                Hu_Quantity: huItem.HandlingUnitQuantity || "",
-                Uom: huItem.HandlingUnitQuantityUnit || "",
-                St_Type: hu.StorageType || "",
-                Storage_Location: hu.StorageLocation || "",
-                Storage_Bin: hu.StorageBin || "",
-                Vendor_Code: po.Supplier || "",
+        Hu_Quantity: huItem.HandlingUnitQuantity || "",
+        Uom: huItem.HandlingUnitQuantityUnit || "",
+        St_Type: hu.StorageType || "",
+        Storage_Location: hu.StorageLocation || "",
+        Storage_Bin: hu.StorageBin || "",
 
-                Delivery: ibd.DeliveryDocument || "",
-                Delivery_Item: ibd.DeliveryDocumentItem || "",
+        // IBD
+        Delivery: ibd.DeliveryDocument || "",
+        Delivery_Item: ibd.DeliveryDocumentItem || "",
+        Exp_date: ibd.ShelfLifeExpirationDate || "",
+        Manufacture_date: ibd.ManufactureDate || "",
+        Batch: ibd.Batch || "",
 
-                Exp_date: ibd.ShelfLifeExpirationDate || "",
-                Manufacture_date: ibd.ManufactureDate || "",
-                Batch: ibd.Batch || "",
+        // ----------------------------
+        // PURCHASE ORDER (ONLY IF PO)
+        // ----------------------------
+        Purchase_Order: isProdOrder ? "" : po?.PurchaseOrder || "",
+        PO_Item:        isProdOrder ? "" : poItem?.PurchaseOrderItem || "",
+        Vendor_Part:    isProdOrder ? "" : poItem?.ManufacturerMaterial || "",
+        Vendor_Code:    isProdOrder ? "" : po?.Supplier || "",
 
-                Stock_Category: poItem?.StockType === "X" ? "X" : "",
-                Special_stock: poItem?.PurchaseOrderCategory === "K" ? "K" : "",
+        Stock_Category: isProdOrder ? "" :
+            poItem?.StockType === "X" ? "X" : "",
 
-                Purchase_Order: po.PurchaseOrder || "",
-                PO_Item: poItem.PurchaseOrderItem || "",
-                Vendor_Part: poItem.ManufacturerMaterial || "",
+        Special_stock: isProdOrder ? "" :
+            poItem?.PurchaseOrderCategory === "K" ? "K" : "",
 
-                Prod_Order: "",
-                Int_Serialno: "",
+        // ----------------------------
+        // PRODUCTION ORDER (TEMP)
+        // ----------------------------
+        Prod_Order: isProdOrder ? prod?.OrderID || "" : "",
+        Int_Serialno: "",
 
-                GR: mat.DocumentNo || "",
-                GR_Qty: mat.QuantityInBaseUnit || "",
-                GR_Date: mat.CreationDate || "",
+        // GR
+        GR: mat.DocumentNo || "",
+        GR_Qty: mat.QuantityInBaseUnit || "",
+        GR_Date: mat.CreationDate || "",
 
-                CO: data.rfExtras.CO,
-                IE: data.rfExtras.VLot,
-                Label_Format: data.rfExtras.P1,
-                Printer: data.rfExtras.F1,
-                Box: data.rfExtras.Box || ""
-            }
-        };
+        // UI
+        CO: data.rfExtras.CO,
+        IE: data.rfExtras.VLot,
+        Label_Format: data.rfExtras.P1,
+        Printer: data.rfExtras.F1,
+        Box: data.rfExtras.Box || ""
+    }
+};
 
         console.log("📦 FINAL CPI PAYLOAD →", payload);
 
