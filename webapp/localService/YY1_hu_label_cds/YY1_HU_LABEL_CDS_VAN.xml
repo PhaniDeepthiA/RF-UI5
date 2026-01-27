@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+    <edmx:Reference Uri="../../catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_COMMON',Version='0001',SAP__Origin='')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.Common.v1" Alias="Common"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="../../catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_UI',Version='0001',SAP__Origin='')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.UI.v1" Alias="UI"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="../../catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_COMMUNICATION',Version='0001',SAP__Origin='')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.Communication.v1" Alias="Communication"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="../../catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_PERSONALDATA',Version='0001',SAP__Origin='')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.PersonalData.v1" Alias="PersonalData"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="../../catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_VALIDATION',Version='0001',SAP__Origin='')/$value">
+        <edmx:Include Namespace="Org.OData.Validation.V1" Alias="Validation"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="../../catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_ANALYTICS',Version='0001',SAP__Origin='')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.Analytics.v1" Alias="Analytics"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="../../catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_HTML5',Version='0001',SAP__Origin='')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.HTML5.v1" Alias="HTML5"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="../../catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_ODM',Version='0001',SAP__Origin='')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.ODM.v1" Alias="SAP__ODM"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="../../../sap/yy1_hu_label_cds/$metadata">
+        <edmx:Include Namespace="YY1_HU_LABEL_CDS" Alias="SAP"/>
+    </edmx:Reference>
+    <edmx:DataServices>
+        <Schema Namespace="yy1_hu_label_cds_van.v1" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+            <Annotations Target="YY1_HU_LABEL_CDS.YY1_HU_LABELType/SAP_UUID">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="YY1_HU_LABEL_CDS.YY1_HU_LABELType">
+                <Annotation Term="UI.Facets">
+                    <Collection>
+                        <Record Type="UI.CollectionFacet">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_NS}"/>
+                            <PropertyValue Property="ID" String="HU_LABEL"/>
+                            <PropertyValue Property="Facets">
+                                <Collection>
+                                    <Record Type="UI.ReferenceFacet">
+                                        <PropertyValue Property="Label" String="{@i18n&gt;SAP_FACET_HEADER_GEN_INFO}"/>
+                                        <PropertyValue Property="ID" String="HU_LABELGeneralInformation"/>
+                                        <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#GeneralInformation"/>
+                                    </Record>
+                                </Collection>
+                            </PropertyValue>
+                        </Record>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="UI.FieldGroup" Qualifier="GeneralInformation">
+                    <Record>
+                        <PropertyValue Property="Data">
+                            <Collection>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_GR_LA}"/>
+                                    <PropertyValue Property="Value" Path="GR"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Plant_LA}"/>
+                                    <PropertyValue Property="Value" Path="Plant"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_HU_LA}"/>
+                                    <PropertyValue Property="Value" Path="HU"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_barcode_LA}"/>
+                                    <PropertyValue Property="Value" Path="barcode"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Pack_material_LA}"/>
+                                    <PropertyValue Property="Value" Path="Pack_material"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Product_LA}"/>
+                                    <PropertyValue Property="Value" Path="Product"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Mat_Desc_LA}"/>
+                                    <PropertyValue Property="Value" Path="Mat_Desc"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Batch_LA}"/>
+                                    <PropertyValue Property="Value" Path="Batch"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_St_Quantity_LA}"/>
+                                    <PropertyValue Property="Value" Path="St_Quantity"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_St_Type_LA}"/>
+                                    <PropertyValue Property="Value" Path="St_Type"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Exp_Date_LA}"/>
+                                    <PropertyValue Property="Value" Path="Exp_Date"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Date_Code_LA}"/>
+                                    <PropertyValue Property="Value" Path="Date_Code"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Prod_No_LA}"/>
+                                    <PropertyValue Property="Value" Path="Prod_No"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Quantity_LA}"/>
+                                    <PropertyValue Property="Value" Path="Quantity"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Uom_LA}"/>
+                                    <PropertyValue Property="Value" Path="Uom"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Purchase_Ord_LA}"/>
+                                    <PropertyValue Property="Value" Path="Purchase_Ord"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Storage_Loc_LA}"/>
+                                    <PropertyValue Property="Value" Path="Storage_Loc"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Storage_Bin_LA}"/>
+                                    <PropertyValue Property="Value" Path="Storage_Bin"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Vendor_Code_LA}"/>
+                                    <PropertyValue Property="Value" Path="Vendor_Code"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Spl_Stock_LA}"/>
+                                    <PropertyValue Property="Value" Path="Spl_Stock"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Stock_Cat_LA}"/>
+                                    <PropertyValue Property="Value" Path="Stock_Cat"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Prod_Ord_LA}"/>
+                                    <PropertyValue Property="Value" Path="Prod_Ord"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Int_SerialNo_LA}"/>
+                                    <PropertyValue Property="Value" Path="Int_SerialNo"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_CO_LA}"/>
+                                    <PropertyValue Property="Value" Path="CO"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_IE_LA}"/>
+                                    <PropertyValue Property="Value" Path="IE"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Label_Format_LA}"/>
+                                    <PropertyValue Property="Value" Path="Label_Format"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Printer_LA}"/>
+                                    <PropertyValue Property="Value" Path="Printer"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Box_LA}"/>
+                                    <PropertyValue Property="Value" Path="Box"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_GR_Qty_LA}"/>
+                                    <PropertyValue Property="Value" Path="GR_Qty"/>
+                                </Record>
+                                <Record Type="UI.DataField">
+                                    <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_GR_Date_LA}"/>
+                                    <PropertyValue Property="Value" Path="GR_Date"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="UI.HeaderInfo">
+                    <Record>
+                        <PropertyValue Property="TypeName" String="{@i18n&gt;YY1_HU_LABEL_NS}"/>
+                        <PropertyValue Property="TypeNamePlural" String="{@i18n&gt;YY1_HU_LABEL_NP}"/>
+                        <PropertyValue Property="Title">
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="GR"/>
+                            </Record>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_GR_LA}"/>
+                            <PropertyValue Property="Value" Path="GR"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Plant_LA}"/>
+                            <PropertyValue Property="Value" Path="Plant"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_HU_LA}"/>
+                            <PropertyValue Property="Value" Path="HU"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_barcode_LA}"/>
+                            <PropertyValue Property="Value" Path="barcode"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Pack_material_LA}"/>
+                            <PropertyValue Property="Value" Path="Pack_material"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Product_LA}"/>
+                            <PropertyValue Property="Value" Path="Product"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Mat_Desc_LA}"/>
+                            <PropertyValue Property="Value" Path="Mat_Desc"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Batch_LA}"/>
+                            <PropertyValue Property="Value" Path="Batch"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_St_Quantity_LA}"/>
+                            <PropertyValue Property="Value" Path="St_Quantity"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_St_Type_LA}"/>
+                            <PropertyValue Property="Value" Path="St_Type"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Exp_Date_LA}"/>
+                            <PropertyValue Property="Value" Path="Exp_Date"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Date_Code_LA}"/>
+                            <PropertyValue Property="Value" Path="Date_Code"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Prod_No_LA}"/>
+                            <PropertyValue Property="Value" Path="Prod_No"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Quantity_LA}"/>
+                            <PropertyValue Property="Value" Path="Quantity"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Uom_LA}"/>
+                            <PropertyValue Property="Value" Path="Uom"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Purchase_Ord_LA}"/>
+                            <PropertyValue Property="Value" Path="Purchase_Ord"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Storage_Loc_LA}"/>
+                            <PropertyValue Property="Value" Path="Storage_Loc"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Storage_Bin_LA}"/>
+                            <PropertyValue Property="Value" Path="Storage_Bin"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Vendor_Code_LA}"/>
+                            <PropertyValue Property="Value" Path="Vendor_Code"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Spl_Stock_LA}"/>
+                            <PropertyValue Property="Value" Path="Spl_Stock"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Stock_Cat_LA}"/>
+                            <PropertyValue Property="Value" Path="Stock_Cat"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Prod_Ord_LA}"/>
+                            <PropertyValue Property="Value" Path="Prod_Ord"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Int_SerialNo_LA}"/>
+                            <PropertyValue Property="Value" Path="Int_SerialNo"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_CO_LA}"/>
+                            <PropertyValue Property="Value" Path="CO"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_IE_LA}"/>
+                            <PropertyValue Property="Value" Path="IE"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Label_Format_LA}"/>
+                            <PropertyValue Property="Value" Path="Label_Format"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Printer_LA}"/>
+                            <PropertyValue Property="Value" Path="Printer"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_Box_LA}"/>
+                            <PropertyValue Property="Value" Path="Box"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_GR_Qty_LA}"/>
+                            <PropertyValue Property="Value" Path="GR_Qty"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="{@i18n&gt;YY1_HU_LABEL_HU_LABEL_GR_Date_LA}"/>
+                            <PropertyValue Property="Value" Path="GR_Date"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="_Entities"/>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>

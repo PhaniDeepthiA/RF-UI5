@@ -11,7 +11,7 @@ sap.ui.define([
         onInit: function () {
             const oVM = new JSONModel({
                 HuData: "",
-                Warehouse: "1050",
+                Warehouse: "PU01",
 
                 rfExtras: {
                     CO: "",
@@ -37,6 +37,10 @@ sap.ui.define([
             });
 
             this.getView().setModel(oVM, "view");
+
+            const oCountryModel = new sap.ui.model.json.JSONModel();
+    oCountryModel.loadData("model/countries.json");
+    this.getView().setModel(oCountryModel, "countryModel");
         },
 onHuSubmit: function (oEvent) {
     const sHu = oEvent.getParameter("value");
@@ -48,6 +52,77 @@ onHuChange: function (oEvent) {
     if (sHu && sHu.length >= 9) this._startHuFlow(sHu);
 },
 
+onAfterRendering: function () {
+    // Warehouse
+    this.byId("idWh").$().css("width", "7ch");
+    this.byId("idWh").$().find("input").css("font-family", "monospace");
+
+    // IE
+    this.byId("idEI").$().css("width", "19ch");
+    this.byId("idEI").$().find("input").css("font-family", "monospace");
+
+    // CO
+    this.byId("idCO").$().css("width", "3ch");
+    this.byId("idCO").$().find("input").css("font-family", "monospace");
+
+    // P
+    this.byId("idP").$().css("width", "33ch");
+    this.byId("idP").$().find("input").css("font-family", "monospace");
+
+    // F
+    this.byId("idF").$().css("width", "33ch");
+    this.byId("idF").$().find("input").css("font-family", "monospace");
+},
+onCOChange: function (oEvent) {
+    const oInput = oEvent.getSource();
+    const oViewModel = this.getView().getModel("view");
+
+    let sValue = oEvent.getParameter("value") || "";
+
+    // Normalize to uppercase
+    sValue = sValue.toUpperCase();
+
+    // Enforce max length = 2
+    if (sValue.length > 2) {
+        sValue = sValue.substring(0, 2);
+    }
+
+    oInput.setValue(sValue);
+
+    // Default: invalid until proven valid
+    oViewModel.setProperty("/rfExtras/COValid", false);
+
+    // Case 0 chars → neutral (user hasn't started)
+    if (sValue.length === 0) {
+        oInput.setValueState("None");
+        return;
+    }
+
+    // Case 1 char → incomplete (invalid)
+    if (sValue.length === 1) {
+        oInput.setValueState("Error");
+        oInput.setValueStateText("Enter 2-letter country code");
+        return;
+    }
+
+    // Case 2 chars → validate against static country list
+    const oCountryModel = this.getView().getModel("countryModel");
+    const aCountries = oCountryModel?.getProperty("/countries") || [];
+
+    const bValid = aCountries.some(function (c) {
+        return c.code === sValue;
+    });
+
+    if (!bValid) {
+        oInput.setValueState("Error");
+        oInput.setValueStateText("Invalid Country Code");
+        return;
+    }
+
+    // VALID
+    oInput.setValueState("None");
+    oViewModel.setProperty("/rfExtras/COValid", true);
+},
 _startHuFlow: async function (sHu) {
     const oVM = this.getView().getModel("view");
 
@@ -161,6 +236,20 @@ if (isProdOrder) {
             oVM.setProperty("/matDoc", matDocItem);
         }
 
+
+        // --------------------------
+// 7️⃣ FETCH PRINTER / LAYOUT
+// --------------------------
+// const plant = ibd.Plant;
+// const sloc = ibd.StorageLocation;
+
+// const printerCfg = await this._fetchPrinterLayout(plant, sloc);
+
+// oVM.setProperty("/rfExtras/P1", printerCfg.Layout);
+// oVM.setProperty("/rfExtras/F1", printerCfg.Printer);
+
+// console.log("Printer/Layout resolved →", printerCfg);
+
         sap.m.MessageToast.show("All data loaded successfully!");
 
     } catch (err) {
@@ -179,7 +268,7 @@ if (isProdOrder) {
     try {
         const oModel = this.getView().getModel("huService");
 
-        const warehouse = "1050";
+        const warehouse = "PU01";
 
         const sPath =
             `/HandlingUnit(HandlingUnitExternalID='${sHu}',Warehouse='${warehouse}')` +
@@ -419,6 +508,39 @@ _fetchMaterialDocumentItem: async function (doc, year, item) {
             }
         },
 
+_fetchPrinterLayout: function (plant, sloc) {
+    const oModel = this.getOwnerComponent().getModel("printerLayout");
+
+    if (!oModel) {
+        console.error("Printer Layout model not found");
+        return Promise.reject("Printer Layout model missing");
+    }
+
+    const sPath = "/YY1_DEF_PRINTER_LAYOUT";
+    const mParams = {
+        "$filter": `Plant eq '${plant}' and Sloc eq '${sloc}'`
+    };
+
+    console.log("Printer/Layout PATH →", sPath, mParams);
+
+    return new Promise((resolve, reject) => {
+        oModel.read(sPath, {
+            urlParameters: mParams,
+            success: function (oData) {
+                if (!oData.results || oData.results.length === 0) {
+                    reject("No printer/layout config found");
+                } else {
+                    resolve(oData.results[0]); // first match
+                }
+            },
+            error: function (oError) {
+                console.error("Printer Layout CDS error", oError);
+                reject(oError);
+            }
+        });
+    });
+},
+
         //---------------------------------------------------------------------
         // CLEAR BUTTON
         //---------------------------------------------------------------------
@@ -447,6 +569,15 @@ onPrintProgram: async function () {
         if (!data.HuData) return sap.m.MessageBox.error("Enter Handling Unit");
         if (!data.Warehouse) return sap.m.MessageBox.error("Enter Warehouse");
         if (!data.rfExtras.VLot) return sap.m.MessageBox.error("Enter EI#");
+        if (!data.rfExtras.CO) {
+    return sap.m.MessageBox.error("Enter Country of Origin");
+}
+
+if (data.rfExtras.COValid !== true) {
+    return sap.m.MessageBox.error(
+        "Invalid Country of Origin. Enter a valid 2-letter country code."
+    );
+}
         if (!data.huDetails) return sap.m.MessageBox.error("HU details missing — fetch HU first.");
         if (!data.ibdDetails) return sap.m.MessageBox.error("Inbound Delivery missing");
         //if (!data.poDetails) return sap.m.MessageBox.error("PO details missing");
@@ -473,6 +604,7 @@ const prod = isProdOrder ? data.prodOrderDetails : null;
     Order_HU: {
         HU: data.HuData,
         barcode: data.HuData,
+        
 
         // HU
         Pack_Material: hu.PackagingMaterial || "",
@@ -524,7 +656,9 @@ const prod = isProdOrder ? data.prodOrderDetails : null;
         IE: data.rfExtras.VLot,
         Label_Format: data.rfExtras.P1,
         Printer: data.rfExtras.F1,
-        Box: data.rfExtras.Box || ""
+        Box: data.rfExtras.Box || "",
+        Plant : ibd.Plant,
+        
     }
 };
 
@@ -545,6 +679,17 @@ const prod = isProdOrder ? data.prodOrderDetails : null;
         });
 
         if (oResponse.ok) {
+
+                   try {
+                     await this._postToHULabelService(payload);
+                    console.log("✅ OData POST Successful");
+                } catch (odataError) {
+                    // Log but don't fail entire process
+                    console.warn("⚠️ OData POST Failed (non-critical):", odataError.message);
+                    // Optionally: sap.m.MessageToast.show("Label printed but data save partially failed");
+                }
+
+
             sap.m.MessageBox.success(
                 "Label printed successfully.",
                 {
@@ -565,6 +710,211 @@ const prod = isProdOrder ? data.prodOrderDetails : null;
         sap.m.MessageBox.error(err.message);
     } finally {
         sap.ui.core.BusyIndicator.hide();
+    }
+},
+
+ _postToHULabelService: function (payload) {
+            return new Promise((resolve, reject) => {
+                const oModel = this.getView().getModel("YY1_hu_label_cds");
+
+                if (!oModel) {
+                    console.error("❌ YY1_hu_label_cds model not found");
+                    return reject(new Error("HU Label service model not configured in manifest"));
+                }
+
+                // ⚠️ UPDATE THIS with your actual entity set name from metadata
+                const sEntitySet = "/YY1_HU_LABEL";
+
+                
+                // Map payload to OData structure
+                const odataPayload = this._mapPayloadToOData(payload);
+
+                console.log("📤 Posting to OData:", sEntitySet);
+                console.log("📄 OData Payload:", odataPayload);
+
+                oModel.create(sEntitySet, odataPayload, {
+                    success: (oData) => {
+                        console.log("✅ OData CREATE Success:", oData);
+                        resolve(oData);
+                    },
+                    error: (oError) => {
+                        console.error("❌ OData CREATE Error:", oError);
+
+                        // Parse error message
+                        let sErrorMsg = "Failed to save to HU Label service";
+
+                        if (oError.responseText) {
+                            try {
+                                const oErrorResponse = JSON.parse(oError.responseText);
+                                sErrorMsg = oErrorResponse.error?.message?.value ||
+                                    oErrorResponse.error?.innererror?.errordetails?.[0]?.message ||
+                                    sErrorMsg;
+                            } catch (e) {
+                                sErrorMsg = oError.message || oError.statusText || sErrorMsg;
+                            }
+                        }
+
+                        console.error("Error details:", sErrorMsg);
+                        reject(new Error(sErrorMsg));
+                    }
+                });
+            });
+        },
+
+        // ========================================
+        // PAYLOAD MAPPING
+        // ⚠️ UPDATE THIS based on your OData metadata
+        // ========================================
+        _mapPayloadToOData: function (payload) {
+            const data = payload.Order_HU;
+
+            // Map CPI structure to OData entity structure
+            // These field names are EXAMPLES - update based on YOUR metadata
+
+             const t = (value) => this._truncateString(value, 20);
+        const odataPayload = {
+    // ========================================
+    // KEY FIELD (REQUIRED!)
+    // ========================================
+    SAP_UUID: this._generateUUID(),
+
+    // ========================================
+    // MANDATORY FIELDS (REQUIRED!)
+    // ========================================
+    GR: t(data.GR || data.GR_No || ""),           // ⚠️ REQUIRED
+    HU: t(data.HU || ""),                          // ⚠️ REQUIRED
+    Plant: t(data.Plant || ""),                    // ⚠️ REQUIRED
+
+    // ========================================
+    // OPTIONAL FIELDS - EXACT METADATA NAMES
+    // ========================================
+    // Basic HU Info
+    barcode: t(data.barcode || data.HU),
+    Pack_material: t(data.Pack_Material),          // Note: Pack_material not Pack_Material
+    Product: t(data.Product),
+    Mat_Desc: t(data.Prod_Desc),
+    Batch: t(data.Batch),
+    
+    // Quantities & UOM
+    St_Quantity: t(data.Hu_Quantity),              // Note: St_Quantity for HU quantity
+    Quantity: t(data.Hu_Quantity || data.GR_Qty), // Note: Quantity (general)
+    Uom: t(data.Uom),                              // Note: Uom NOT UOM!
+    
+    // Storage Info
+    St_Type: t(data.St_Type),                      // Note: St_Type not StorageType
+    Storage_Loc: t(data.Storage_Location),         // Note: Storage_Loc not StorageLocation
+    Storage_Bin: t(data.Storage_Bin),              // Note: Storage_Bin (correct)
+    
+    // Dates (ALL are strings, no formatting needed!)
+    Exp_Date:t(data.Exp_date),                   // Note: Exp_Date not Exp_date
+    Date_Code: t(data.Manufacture_date),          // Note: Date_Code not ManufactureDate
+    
+    // Purchase Order Info
+    Purchase_Ord: t(data.Purchase_Order),          // Note: Purchase_Ord not PurchaseOrder
+    Vendor_Code: t(data.Vendor_Code),              // Note: Vendor_Code (correct)
+    Stock_Cat: t(data.Stock_Category),             // Note: Stock_Cat not StockCategory
+    Spl_Stock: t(data.Special_stock),              // Note: Spl_Stock not SpecialStock
+    
+    // Production Order Info
+    Prod_Ord: t(data.Prod_Order),                  // Note: Prod_Ord not ProductionOrder
+    Prod_No: t(data.Prod_Order),                   // Note: Prod_No (production number)
+    Int_SerialNo: t(data.Int_Serialno),            // Note: Int_SerialNo not InternalSerialNumber
+    
+    // Additional Fields
+    CO: t(data.CO),
+    IE: t(data.IE),
+    Label_Format: t(data.Label_Format),            // Note: Label_Format (correct)
+    Printer: t(data.Printer),
+    Box: t(data.Box),
+    
+    // Goods Receipt Info
+    GR_Qty: t(data.GR_Qty || data.GRQuantity),    // Note: GR_Qty not GRQuantity
+    //GR_Date: this._formatDateForSAP(data.GR_Date || data.GRDate),
+    GR_Date: t(data.GR_Date || data.GRDate),
+
+     // Note: GR_Date not GRDate
+};
+
+            return odataPayload;
+        },
+
+        // ========================================
+        // HELPER METHODS
+        // ========================================
+        _formatDate: function (dateValue) {
+            if (!dateValue) return null;
+
+            // If already a Date object
+            if (dateValue instanceof Date) {
+                return dateValue;
+            }
+
+            // If string, try to parse
+            try {
+                const date = new Date(dateValue);
+                if (!isNaN(date.getTime())) {
+                    return date;
+                }
+            } catch (e) {
+                console.warn("Date parsing failed:", dateValue);
+            }
+
+            return null;
+        },
+
+        _generateUUID: function () {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        },
+
+_truncateString: function (value, maxLength) {
+    if (!value) return "";
+    const str = String(value);
+    if (str.length > maxLength) {
+        console.warn(`⚠️ Truncating "${str}" to ${maxLength} chars`);
+        return str.substring(0, maxLength);
+    }
+    return str;
+},
+_formatDateForSAP: function (dateValue) {
+    if (!dateValue) return "";
+    
+    let date;
+    
+    try {
+        // Handle OData V2 format: /Date(1234567890000)/
+        if (typeof dateValue === 'string' && dateValue.startsWith('/Date(')) {
+            const timestamp = parseInt(dateValue.match(/\d+/)[0]);
+            date = new Date(timestamp);
+        }
+        // Handle Date object
+        else if (dateValue instanceof Date) {
+            date = dateValue;
+        }
+        // Handle string date
+        else if (typeof dateValue === 'string') {
+            date = new Date(dateValue);
+        }
+        else {
+            return "";
+        }
+        
+        // Validate
+        if (isNaN(date.getTime())) return "";
+        
+        // Format as YYYYMMDD
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        
+        return `${year}${month}${day}`;
+        
+    } catch (error) {
+        console.error("Date formatting error:", error);
+        return "";
     }
 },
 

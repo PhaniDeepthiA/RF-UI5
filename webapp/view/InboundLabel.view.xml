@@ -12,81 +12,98 @@
 
                         <!-- HANDLING UNIT -->
                         <Label text="Handling Unit" class="guiLabel" labelFor="idHu"/>
-                        <Input id="idHu"
-                            value="{view>/HuData}"
-                            editable="true"
-                            width="100%"
-                            class="guiInput guiEditable"
-                            submit="onHuSubmit"
-                            change="onHuChange"
-                        />
+                       <HBox alignItems="Center">
+    <Input
+        id="idHu"
+        value="{view>/HuData}"
+        maxLength="20"
+        class="guiInput guiEditable hu20"
+        submit="onHuSubmit"
+        change="onHuChange">
+        <layoutData>
+            <FlexItemData growFactor="0"/>
+        </layoutData>
+    </Input>
+</HBox>
 
                         <!-- WAREHOUSE -->
-                        <Label text="Warehouse" class="guiLabel" labelFor="idWh"/>
-                        <Input id="idWh"
-                            value="{view>/Warehouse}"
-                            placeholder="Enter Warehouse"
-                            editable="true"
-                            width="100%"
-                            class="guiInput guiEditable"
-                        />
+                   <Label text="Warehouse"   class="guiLabel sapUiTinyMarginTop"
+    labelFor="idWh"/>
+
+<Input
+    id="idWh"
+    value="{view>/Warehouse}"
+    maxLength="4"
+    class="guiInput guiEditable"
+/>
 
                         <!-- IE -->
-                        <Label text="IE#" class="guiLabel" labelFor="idEI"/>
-                        <Input id="idEI"
-                            value="{view>/rfExtras/VLot}"
-                            maxLength="15"
-                            editable="true"
-                            width="100%"
-                            class="guiInput guiEditable"
-                        />
+                   <Label text="IE#" class="guiLabel sapUiTinyMarginTop" labelFor="idEI" />
+
+<HBox alignItems="Center">
+    <Input
+        id="idEI"
+        value="{view>/rfExtras/VLot}"
+        maxLength="17"
+        editable="true"
+        class="guiInput guiEditable"/>
+</HBox>
 
                         <!-- CO -->
-                        <Label text="CO" class="guiLabel" labelFor="idCO"/>
-                        <Input id="idCO"
-                            value="{view>/rfExtras/CO}"
-                            editable="true"
-                            width="100%"
-                            class="guiInput guiEditable"
-                        />
+                   <Label text="CO" class="guiLabel sapUiTinyMarginTop" labelFor="idCO"/>
+
+<HBox alignItems="Center">
+    <Input
+        id="idCO"
+        value="{view>/rfExtras/CO}"
+        maxLength="2"
+        width="4rem"
+
+        editable="true"
+        liveChange="onCOChange"
+        class="guiInput guiEditable"/>
+</HBox>
 
                         <!-- Printer P -->
-                        <Label text="P:" class="guiLabel" labelFor="idP"/>
+                        <Label text="P:" class="guiLabel sapUiTinyMarginTop" labelFor="idP"/>
                         <Input id="idP"
                             value="{view>/rfExtras/P1}"
                             editable="true"
-                            width="100%"
+                           maxLength="17"
+                             width="18rem"
                             class="guiInput guiEditable"
                         />
 
                         <!-- Printer F -->
-                        <Label text="F:" class="guiLabel" labelFor="idF"/>
+                        <Label text="F:" class="guiLabel sapUiTinyMarginTop" labelFor="idF"/>
                         <Input id="idF"
                             value="{view>/rfExtras/F1}"
                             editable="true"
-                            width="100%"
+                            maxLength="17"
+                              width="18rem"
                             class="guiInput guiEditable"
                         />
 
                         <!-- ACTION BUTTONS -->
-                        <HBox class="sapUiMediumMargin"
-                            justifyContent="Center"
-                            alignItems="Center"
-                            width="100%"
-                            >
+   <VBox class="sapUiMediumMarginTop">
+    <HBox>
+        <Button
+            text="F2 Clr"
+            width="8rem"
+            type="Default"
+            press="onChangeData"
+            class="guiBtn guiBtnDef actionBtn"/>
 
-                            <Button text="F2 Clr"
-                                width="8rem"
-                                type="Default"
-                                press="onChangeData"
-                                class="guiBtn guiBtnDef actionBtn"/>
+        <HBox width="0.5rem"/>
 
-                            <Button text="F9-PrintHU"
-                                width="8rem"
-                                type="Emphasized"
-                                press="onPrintProgram"
-                                class="guiBtn guiBtnDef actionBtn prgrBtn"/>
-                        </HBox>
+        <Button
+            text="F9-PrintHU"
+            width="8rem"
+            type="Emphasized"
+            press="onPrintProgram"
+            class="guiBtn guiBtnDef actionBtn prgrBtn"/>
+    </HBox>
+</VBox>
 
                         <!-- LOADER -->
                         <BusyIndicator visible="{view>/isLoading}" class="sapUiMediumMarginTop"/>

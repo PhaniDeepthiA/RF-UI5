@@ -1,0 +1,14 @@
+/* Character-accurate widths */
+.hu20 { width: 22ch; }
+.wh4  { width: 5ch; }
+.ie18 { width: 19ch; }
+.co2  { width: 3ch; }
+
+/* Inner input fills wrapper */
+.hu20 .sapMInputBaseInner,
+.wh4  .sapMInputBaseInner,
+.ie18 .sapMInputBaseInner,
+.co2  .sapMInputBaseInner {
+    width: 100%;
+    font-family: monospace;
+}
