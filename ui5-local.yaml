@@ -30,7 +30,7 @@ server:
         backend:
           - url: https://my430117.s4hana.cloud.sap
             authenticationType: BasicAuthentication
-            destination: BTPTOS4HC_DEV
+            destination: BTPTOS4HC_DEV 
             path: /sap
           - url: https://my424374-api.s4hana.cloud.sap
             authenticationType: SAMLAssertion
@@ -38,7 +38,7 @@ server:
             path: /sap/opu/odata/sap/YY1_hu_label_cds/
           - url: https://my430117.s4hana.cloud.sap
             authenticationType: BasicAuthentication
-            destination: BTPTOS4HC_DEV
+            destination: BTPTOS4HC_DEV 
             path: /sap/opu/odata/sap/YY1_DEF_PRINTER_LAYOUT_cds/
     - name: sap-fe-mockserver
       beforeMiddleware: csp

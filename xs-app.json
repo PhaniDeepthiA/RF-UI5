@@ -6,7 +6,7 @@
     {
       "source": "^/sap/opu/odata4/(.*)$",
       "target": "/sap/opu/odata4/$1",
-      "destination": "BTPTOS4HC_DEV",
+      "destination": "BTPTOS4HC_DEV ",
       "authenticationType": "xsuaa",
       "csrfProtection": false
     },
@@ -14,7 +14,7 @@
       {
       "source": "^/sap/opu/odata/(.*)$",
       "target": "/sap/opu/odata/$1",
-      "destination": "BTPTOS4HC_DEV",
+      "destination": "BTPTOS4HC_DEV ",
       "authenticationType": "xsuaa",
       "csrfProtection": true
     },

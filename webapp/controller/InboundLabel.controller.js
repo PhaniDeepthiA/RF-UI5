@@ -42,15 +42,18 @@ sap.ui.define([
     oCountryModel.loadData("model/countries.json");
     this.getView().setModel(oCountryModel, "countryModel");
         },
+
 onHuSubmit: function (oEvent) {
     const sHu = oEvent.getParameter("value");
-    if (sHu) this._startHuFlow(sHu);
+   // if (sHu) this._startHuFlow(sHu);
+
+   this._startIbdFlow(sHu);
 },
 
-onHuChange: function (oEvent) {
-    const sHu = oEvent.getParameter("value");
-    if (sHu && sHu.length >= 9) this._startHuFlow(sHu);
-},
+// onHuChange: function (oEvent) {
+//     const sHu = oEvent.getParameter("value");
+//     if (sHu && sHu.length >= 9) this._startHuFlow(sHu);
+// },
 
 onAfterRendering: function () {
     // Warehouse
@@ -123,143 +126,376 @@ onCOChange: function (oEvent) {
     oInput.setValueState("None");
     oViewModel.setProperty("/rfExtras/COValid", true);
 },
-_startHuFlow: async function (sHu) {
+
+_startIbdFlow: async function (ibd) {
     const oVM = this.getView().getModel("view");
 
     try {
         sap.ui.core.BusyIndicator.show(0);
-        console.log("Starting HU → IBD → PO → DocFlow → MatDoc pipeline");
+        console.log("Starting IBD-driven flow:", ibd);
 
-        // --------------------------
-        // 1 FETCH HU DETAILS
-        // --------------------------
-        const hu = await this._fetchHUDetails(sHu);
-        if (!hu) throw new Error("HU fetch failed. Stopping pipeline.");
-
-        console.log("HU OK →", hu);
-        oVM.setProperty("/huDetails", hu);
-
-        // Extract IBD number from HU
-        const ibd = hu.HandlingUnitReferenceDocument;
-        if (!ibd) throw new Error("IBD missing inside HU response");
-
-        console.log("IBD extracted:", ibd);
-        oVM.setProperty("/ibd", ibd); // raw number (if you want it)
-
-        // --------------------------
-        // 2️ FETCH INBOUND DELIVERY ITEMS
-        // --------------------------
+        // =================================================
+        // 1️ Fetch IBD Items
+        // =================================================
         const ibdItems = await this._fetchInboundDelivery(ibd);
-        if (!ibdItems || ibdItems.length === 0) {
-            throw new Error("No Inbound Delivery Items returned.");
+        if (!ibdItems || !ibdItems.length) {
+            throw new Error("No IBD items found");
         }
 
-        console.log("IBD Items OK →", ibdItems);
-        oVM.setProperty("/ibdItems", ibdItems);
-
-        // take first item for payload usage
         const firstItem = ibdItems[0];
-        oVM.setProperty("/ibdDetails", firstItem);   // ⬅ this is what onPrintProgram expects
+        oVM.setProperty("/ibdItems", ibdItems);
+        oVM.setProperty("/ibdDetails", firstItem);
 
-        // --------------------------
-        // 3️ FETCH PO USING IBD → ReferenceSDDocument
-        // --------------------------
-      const isProdOrder = firstItem.DeliveryDocumentItemCategory === "DIGN";
-oVM.setProperty("/isProdOrder", isProdOrder);
+        // =================================================
+        // 2️ PO vs Production Order
+        // =================================================
+        const isProdOrder = firstItem.DeliveryDocumentItemCategory === "DIGN";
+        oVM.setProperty("/isProdOrder", isProdOrder);
 
-if (isProdOrder) {
-    // Production Order — NO API CALL
-    const prodDetails = {
-        OrderID: firstItem.OrderID,
-        OrderItem: firstItem.OrderItem
-    };
+        if (isProdOrder) {
+            oVM.setProperty("/prodOrderDetails", {
+                OrderID: firstItem.OrderID,
+                OrderItem: firstItem.OrderItem
+            });
+        } else {
+            const poNumber = firstItem.ReferenceSDDocument;
+            if (!poNumber) {
+                throw new Error("PO number missing in IBD");
+            }
 
-    console.log("Production Order detected →", prodDetails);
-    oVM.setProperty("/prodOrderDetails", prodDetails);
+            const poDetails = await this._fetchPO(poNumber);
+            oVM.setProperty("/poDetails", poDetails);
+        }
 
-} else {
-    // Purchase Order — EXISTING FLOW
-    const poNumber = firstItem.ReferenceSDDocument;
-
-    if (poNumber) {
-        console.log("Fetching PO:", poNumber);
-
-        const poDetails = await this._fetchPO(poNumber);
-        oVM.setProperty("/poDetails", poDetails);
-
-    } else {
-        console.warn("No PO found in IBD Item");
-    }
-}
-
-        // --------------------------
-        // 4️ FETCH DOCUMENT FLOW
-        // --------------------------
-        console.log(`Calling DocFlow for IBD=${ibd}, Item=${firstItem.DeliveryDocumentItem}`);
-
+        // =================================================
+        // 3️ Document Flow → pick LATEST GR
+        // =================================================
         const docFlow = await this._fetchDocumentFlow(
             ibd,
             firstItem.DeliveryDocumentItem
         );
 
-        if (!docFlow) {
-            throw new Error("Document Flow is empty");
+        if (!Array.isArray(docFlow) || !docFlow.length) {
+            throw new Error("Document Flow empty");
         }
 
-        console.log("DOC FLOW ENTRY →", docFlow);
-        oVM.setProperty("/docFlow", docFlow);
+        const grEntries = docFlow.filter(
+            e => e.SubsequentDocumentCategory === "R"
+        );
 
-        // --------------------------
-        // 5️ EXTRACT MATERIAL DOCUMENT FROM DOC FLOW
-        // --------------------------
-        const matDocInfo = this._extractMaterialDocument(docFlow);
-
-        if (!matDocInfo) {
-            console.warn("No Material Document found in Document Flow");
-            oVM.setProperty("/matDoc", null);
-        } else {
-            console.log("Material Doc Keys:", matDocInfo);
-
-            // --------------------------
-            // 6️ FETCH MATERIAL DOCUMENT ITEM
-            // --------------------------
-
-
-            
-            const matDocItem = await this._fetchMaterialDocumentItem(
-                matDocInfo.MaterialDocument,
-                matDocInfo.Year,
-                matDocInfo.MaterialDocumentItem
-            );
-
-            console.log("MATERIAL DOCUMENT ITEM OK:", matDocItem);
-            oVM.setProperty("/matDoc", matDocItem);
+        if (!grEntries.length) {
+            throw new Error("No Goods Receipt found for IBD");
         }
 
+        // Pick latest GR numerically (SAP safe)
+        const latestGR = grEntries.reduce((max, curr) =>
+            Number(curr.SubsequentDocument) > Number(max.SubsequentDocument)
+                ? curr
+                : max
+        );
 
-        // --------------------------
-// 7️⃣ FETCH PRINTER / LAYOUT
-// --------------------------
-// const plant = ibd.Plant;
-// const sloc = ibd.StorageLocation;
+        console.log("Latest GR selected:", latestGR.SubsequentDocument);
 
-// const printerCfg = await this._fetchPrinterLayout(plant, sloc);
+        // =================================================
+        // 4️ Fetch Material Document (LATEST GR)
+        // =================================================
+        const matDoc = await this._fetchMaterialDocumentItem(
+            latestGR.SubsequentDocument,
+            latestGR.SubsequentDocumentYear || new Date().getFullYear().toString(),
+            (latestGR.SubsequentDocumentItem || "0001").slice(-4)
+        );
 
-// oVM.setProperty("/rfExtras/P1", printerCfg.Layout);
-// oVM.setProperty("/rfExtras/F1", printerCfg.Printer);
+        oVM.setProperty("/matDoc", matDoc);
 
-// console.log("Printer/Layout resolved →", printerCfg);
+        console.log(
+            "Latest GR timestamp:",
+            new Date(matDoc.CreationDate).toISOString()
+        );
 
-        sap.m.MessageToast.show("All data loaded successfully!");
+        // =================================================
+        // 5️ Fetch ALL HUs for IBD (CORRECT LOGIC)
+        // =================================================
+      const huList = await this._fetchHUsForInboundDelivery(ibd);
+
+const latestHUs = this._getLatestHUs(huList);
+
+oVM.setProperty("/huList", latestHUs);
+
+console.log(
+    `${latestHUs.length} latest HUs selected for GR ${matDoc.DocumentNo}`
+);
 
     } catch (err) {
-        console.error("Pipeline Error →", err);
+        console.error("IBD Flow failed", err);
         sap.m.MessageBox.error(err.message);
-
     } finally {
         sap.ui.core.BusyIndicator.hide();
     }
-},   //---------------------------------------------------------------------
+},
+
+_getLatestHUs: function (huList) {
+    if (!huList.length) return [];
+
+    // Sort by HU creation time DESC
+    const sorted = huList.sort((a, b) => {
+        const aTime = new Date(a.CreationDateTime || a.CreatedAt || 0).getTime();
+        const bTime = new Date(b.CreationDateTime || b.CreatedAt || 0).getTime();
+        return bTime - aTime;
+    });
+
+    // Take HUs with SAME timestamp as the latest one
+    const latestTime = new Date(
+        sorted[0].CreationDateTime || sorted[0].CreatedAt
+    ).getTime();
+
+    return sorted.filter(hu => {
+        const huTime = new Date(
+            hu.CreationDateTime || hu.CreatedAt
+        ).getTime();
+        return huTime === latestTime;
+    });
+},
+
+_fetchHUsForMaterialDoc: async function (materialDoc) {
+    const oModel = this.getView().getModel("huService"); // OData V4
+    const oVM = this.getView().getModel("view");
+
+    try {
+        const warehouse = oVM.getProperty("/Warehouse");
+
+        const sPath = "/HandlingUnit";
+
+        const mParameters = {
+            $filter: `HandlingUnitReferenceDocument eq '${materialDoc}' and Warehouse eq '${warehouse}'`,
+            $expand: {
+                _HandlingUnitItem: {}
+            },
+            $$groupId: "$direct"
+        };
+
+        console.log("HU LIST PARAMS →", mParameters);
+
+        const oListBinding = oModel.bindList(
+            sPath,
+            null,
+            null,
+            null,
+            mParameters
+        );
+
+        const aContexts = await oListBinding.requestContexts();
+
+        if (!aContexts.length) {
+            throw new Error("No Handling Units found for Material Document");
+        }
+
+        const aHUs = aContexts.map(c => c.getObject());
+
+        console.log(`${aHUs.length} HUs fetched`, aHUs);
+
+        oVM.setProperty("/huList", aHUs);
+
+        return aHUs;
+
+    } catch (err) {
+        console.error("HU Fetch Failed:", err);
+        throw err;
+    }
+},
+_fetchHUsForInboundDelivery: async function (ibd) {
+    const oModel = this.getView().getModel("huService");
+    const warehouse = "PU01";
+
+    if (!oModel) {
+        throw new Error("HU service model not found");
+    }
+
+    // CORRECT: clean entity set path
+    const sPath = "/HandlingUnit";
+
+    console.log("HU LIST BASE PATH →", sPath);
+
+    // CORRECT: filter goes into parameters
+    const oBinding = oModel.bindList(sPath, null, null, null, {
+        $filter: `HandlingUnitReferenceDocument eq '${ibd}' and Warehouse eq '${warehouse}'`
+    });
+
+    const aContexts = await oBinding.requestContexts(0, 200);
+
+    const aHUs = aContexts.map(ctx => ctx.getObject());
+
+    console.log(`${aHUs.length} HUs fetched for IBD ${ibd}`);
+
+    return aHUs;
+},
+
+_filterHUsByLatestGR: function (huList, matDoc) {
+    if (!matDoc?.DocumentNo) {
+        console.warn("Material Document number missing — returning all HUs");
+        return huList;
+    }
+
+    const latestMatDoc = String(matDoc.DocumentNo);
+
+    console.log("Filtering HUs by Material Document:", latestMatDoc);
+
+    const filtered = huList.filter(hu =>
+        String(hu.HandlingUnitReferenceDocument) === latestMatDoc
+    );
+
+    console.log(`${filtered.length} HUs linked to GR ${latestMatDoc}`);
+
+    return filtered;
+},
+
+_extractHUsForMaterialDoc: function (docFlow, matDocNo, matDocYear) {
+    if (!Array.isArray(docFlow)) return [];
+
+    return docFlow
+        .filter(e =>
+            e.SubsequentDocumentCategory === "H" &&   // HU
+            e.PrecedingDocument === matDocNo &&
+            String(e.PrecedingDocumentYear) === String(matDocYear)
+        )
+        .map(e => e.SubsequentDocument);
+},
+// _startHuFlow: async function (sHu) {
+//     const oVM = this.getView().getModel("view");
+
+//     try {
+//         sap.ui.core.BusyIndicator.show(0);
+//         console.log("Starting HU → IBD → PO → DocFlow → MatDoc pipeline");
+
+//         // --------------------------
+//         // 1 FETCH HU DETAILS
+//         // --------------------------
+//         const hu = await this._fetchHUDetails(sHu);
+//         if (!hu) throw new Error("HU fetch failed. Stopping pipeline.");
+
+//         console.log("HU OK →", hu);
+//         oVM.setProperty("/huDetails", hu);
+
+//         // Extract IBD number from HU
+//         const ibd = hu.HandlingUnitReferenceDocument;
+//         if (!ibd) throw new Error("IBD missing inside HU response");
+
+//         console.log("IBD extracted:", ibd);
+//         oVM.setProperty("/ibd", ibd); // raw number (if you want it)
+
+//         // --------------------------
+//         // 2️ FETCH INBOUND DELIVERY ITEMS
+//         // --------------------------
+//         const ibdItems = await this._fetchInboundDelivery(ibd);
+//         if (!ibdItems || ibdItems.length === 0) {
+//             throw new Error("No Inbound Delivery Items returned.");
+//         }
+
+//         console.log("IBD Items OK →", ibdItems);
+//         oVM.setProperty("/ibdItems", ibdItems);
+
+//         // take first item for payload usage
+//         const firstItem = ibdItems[0];
+//         oVM.setProperty("/ibdDetails", firstItem);   // ⬅ this is what onPrintProgram expects
+
+//         // --------------------------
+//         // 3️ FETCH PO USING IBD → ReferenceSDDocument
+//         // --------------------------
+//       const isProdOrder = firstItem.DeliveryDocumentItemCategory === "DIGN";
+// oVM.setProperty("/isProdOrder", isProdOrder);
+
+// if (isProdOrder) {
+//     // Production Order — NO API CALL
+//     const prodDetails = {
+//         OrderID: firstItem.OrderID,
+//         OrderItem: firstItem.OrderItem
+//     };
+
+//     console.log("Production Order detected →", prodDetails);
+//     oVM.setProperty("/prodOrderDetails", prodDetails);
+
+// } else {
+//     // Purchase Order — EXISTING FLOW
+//     const poNumber = firstItem.ReferenceSDDocument;
+
+//     if (poNumber) {
+//         console.log("Fetching PO:", poNumber);
+
+//         const poDetails = await this._fetchPO(poNumber);
+//         oVM.setProperty("/poDetails", poDetails);
+
+//     } else {
+//         console.warn("No PO found in IBD Item");
+//     }
+// }
+
+//         // --------------------------
+//         // 4️ FETCH DOCUMENT FLOW
+//         // --------------------------
+//         console.log(`Calling DocFlow for IBD=${ibd}, Item=${firstItem.DeliveryDocumentItem}`);
+
+//         const docFlow = await this._fetchDocumentFlow(
+//             ibd,
+//             firstItem.DeliveryDocumentItem
+//         );
+
+//         if (!docFlow) {
+//             throw new Error("Document Flow is empty");
+//         }
+
+//         console.log("DOC FLOW ENTRY →", docFlow);
+//         oVM.setProperty("/docFlow", docFlow);
+
+//         // --------------------------
+//         // 5️ EXTRACT MATERIAL DOCUMENT FROM DOC FLOW
+//         // --------------------------
+//         const matDocInfo = this._extractMaterialDocument(docFlow);
+
+//         if (!matDocInfo) {
+//             console.warn("No Material Document found in Document Flow");
+//             oVM.setProperty("/matDoc", null);
+//         } else {
+//             console.log("Material Doc Keys:", matDocInfo);
+
+//             // --------------------------
+//             // 6️ FETCH MATERIAL DOCUMENT ITEM
+//             // --------------------------
+
+
+            
+//             const matDocItem = await this._fetchMaterialDocumentItem(
+//                 matDocInfo.MaterialDocument,
+//                 matDocInfo.Year,
+//                 matDocInfo.MaterialDocumentItem
+//             );
+
+//             console.log("MATERIAL DOCUMENT ITEM OK:", matDocItem);
+//             oVM.setProperty("/matDoc", matDocItem);
+//         }
+
+
+//         // --------------------------
+// // 7️ FETCH PRINTER / LAYOUT
+// // --------------------------
+// // const plant = ibd.Plant;
+// // const sloc = ibd.StorageLocation;
+
+// // const printerCfg = await this._fetchPrinterLayout(plant, sloc);
+
+// // oVM.setProperty("/rfExtras/P1", printerCfg.Layout);
+// // oVM.setProperty("/rfExtras/F1", printerCfg.Printer);
+
+// // console.log("Printer/Layout resolved →", printerCfg);
+
+//         sap.m.MessageToast.show("All data loaded successfully!");
+
+//     } catch (err) {
+//         console.error("Pipeline Error →", err);
+//         sap.m.MessageBox.error(err.message);
+
+//     } finally {
+//         sap.ui.core.BusyIndicator.hide();
+//     }
+// },   //---------------------------------------------------------------------
         // HU READ (V4)
         //---------------------------------------------------------------------
  _fetchHUDetails: async function (sHu) {
@@ -406,27 +642,34 @@ _fetchDocumentFlow: function (deliveryNumber, deliveryItem) {
    },
 
      // Correctly extract Material Document entry
-_extractMaterialDocument: function (docFlowOrArray) {
-    if (!docFlowOrArray) return null;
-
-    // Normalize to array
-    const arr = Array.isArray(docFlowOrArray) ? docFlowOrArray : [docFlowOrArray];
-
-    // ONLY Material Document = Category 'R'
-    const entry = arr.find(e => e.SubsequentDocumentCategory == "R");
-
-    if (!entry) {
-        console.warn("No Material Document found based on SubsequentDocumentCategory = 'R'");
+_extractMaterialDocument: function (docFlowArray) {
+    if (!Array.isArray(docFlowArray) || docFlowArray.length === 0) {
         return null;
     }
 
-    const rawItem = entry.SubsequentDocumentItem || "000001";
+    // 1️ Keep ONLY Goods Receipts
+    const grEntries = docFlowArray.filter(
+        e => e.SubsequentDocumentCategory === "R"
+    );
+
+    if (!grEntries.length) {
+        console.warn("No GR entries found in document flow");
+        return null;
+    }
+
+    // 2️ Pick MAX Material Document NUMERICALLY
+    const latest = grEntries.reduce((max, curr) => {
+        return Number(curr.SubsequentDocument) > Number(max.SubsequentDocument)
+            ? curr
+            : max;
+    });
+
+    console.log("Latest GR selected:", latest.SubsequentDocument);
 
     return {
-        MaterialDocument: entry.SubsequentDocument,
-        // SAP inconsistency fix: 6-digit → 4-digit
-        MaterialDocumentItem: rawItem.slice(-4),
-        Year: entry.SubsequentDocumentYear || new Date().getFullYear()
+        MaterialDocument: latest.SubsequentDocument,
+        MaterialDocumentItem: (latest.SubsequentDocumentItem || "000001").slice(-4),
+        Year: new Date().getFullYear().toString() // year comes from header anyway
     };
 },
 
@@ -442,7 +685,7 @@ _fetchMaterialDocumentItem: async function (doc, year, item) {
     const docYear = year || new Date().getFullYear().toString();
 
     // ----------------------------------------
-    // 1️⃣ Fetch HEADER (CreationDate)
+    // 1️ Fetch HEADER (CreationDate)
     // ----------------------------------------
     const headerPath =
         `/A_MaterialDocumentHeader(MaterialDocument='${doc}',MaterialDocumentYear='${docYear}')`;
@@ -457,7 +700,7 @@ _fetchMaterialDocumentItem: async function (doc, year, item) {
     });
 
     // ----------------------------------------
-    // 2️⃣ Fetch ITEM (QuantityInBaseUnit)
+    // 2️ Fetch ITEM (QuantityInBaseUnit)
     // ----------------------------------------
     const itemPath =
         `/A_MaterialDocumentItem(MaterialDocument='${doc}',MaterialDocumentYear='${docYear}',MaterialDocumentItem='${item}')`;
@@ -559,154 +802,139 @@ _fetchPrinterLayout: function (plant, sloc) {
 
 
 onPrintProgram: async function () {
+    const oVM = this.getView().getModel("view");
+    const data = oVM.getData();
+
     try {
-        const oVM = this.getView().getModel("view");
-        const data = oVM.getData();
+        // --------------------------------------------------
+        // 1️ HARD VALIDATIONS
+        // --------------------------------------------------
+        if (!data.ibdDetails) {
+            return sap.m.MessageBox.error("Inbound Delivery not loaded");
+        }
 
-        // -----------------------------
-        // 1. VALIDATIONS
-        // -----------------------------
-        if (!data.HuData) return sap.m.MessageBox.error("Enter Handling Unit");
-        if (!data.Warehouse) return sap.m.MessageBox.error("Enter Warehouse");
-        if (!data.rfExtras.VLot) return sap.m.MessageBox.error("Enter EI#");
-        if (!data.rfExtras.CO) {
-    return sap.m.MessageBox.error("Enter Country of Origin");
-}
+        if (!data.matDoc?.DocumentNo) {
+            return sap.m.MessageBox.error("Latest Goods Receipt not found");
+        }
 
-if (data.rfExtras.COValid !== true) {
-    return sap.m.MessageBox.error(
-        "Invalid Country of Origin. Enter a valid 2-letter country code."
-    );
-}
-        if (!data.huDetails) return sap.m.MessageBox.error("HU details missing — fetch HU first.");
-        if (!data.ibdDetails) return sap.m.MessageBox.error("Inbound Delivery missing");
-        //if (!data.poDetails) return sap.m.MessageBox.error("PO details missing");
-        if (!data.docFlow) return sap.m.MessageBox.error("Document Flow missing");
-        if (!data.matDoc) return sap.m.MessageBox.error("Material Document missing");
+        if (!Array.isArray(data.huList) || data.huList.length === 0) {
+            return sap.m.MessageBox.error(
+                "No Handling Units found for latest Goods Receipt"
+            );
+        }
+
+        if (!data.rfExtras.CO || data.rfExtras.COValid !== true) {
+            return sap.m.MessageBox.error("Enter valid Country of Origin");
+        }
+
+        if (!data.rfExtras.VLot) {
+            return sap.m.MessageBox.error("Enter EI#");
+        }
 
         sap.ui.core.BusyIndicator.show(0);
 
-        const hu = data.huDetails;
         const ibd = data.ibdDetails;
-       const isProdOrder = data.isProdOrder === true;
-
-const po = isProdOrder ? null : data.poDetails?.purchaseOrder;
-const poItem = isProdOrder ? null : data.poDetails?.firstItem;
-const prod = isProdOrder ? data.prodOrderDetails : null;
         const mat = data.matDoc;
 
-        const huItem = hu._HandlingUnitItem?.[0] || {};
+        const isProdOrder = data.isProdOrder === true;
+        const po = isProdOrder ? null : data.poDetails?.purchaseOrder;
+        const poItem = isProdOrder ? null : data.poDetails?.firstItem;
+        const prod = isProdOrder ? data.prodOrderDetails : null;
 
-        // -----------------------------
-        // 2. BUILD PAYLOAD
-        // -----------------------------
-    const payload = {
-    Order_HU: {
-        HU: data.HuData,
-        barcode: data.HuData,
-        
+        const sBaseUrl = sap.ui.require.toUrl("inboundlabel");
+        const sCpiUrl = sBaseUrl + "/http/Bartender/Order";
 
-        // HU
-        Pack_Material: hu.PackagingMaterial || "",
-        Product: huItem.Material || "",
-        Prod_Desc: isProdOrder
-            ? huItem.MaterialDescription || ""
-            : poItem?.PurchaseOrderItemText || "",
+        console.log(
+            `Printing ${data.huList.length} HU(s) for GR ${mat.DocumentNo}`
+        );
 
-        Hu_Quantity: huItem.HandlingUnitQuantity || "",
-        Uom: huItem.HandlingUnitQuantityUnit || "",
-        St_Type: hu.StorageType || "",
-        Storage_Location: hu.StorageLocation || "",
-        Storage_Bin: hu.StorageBin || "",
+        // --------------------------------------------------
+        // 2️ PRINT ONLY LATEST HU(s)
+        // --------------------------------------------------
+        for (const hu of data.huList) {
 
-        // IBD
-        Delivery: ibd.DeliveryDocument || "",
-        Delivery_Item: ibd.DeliveryDocumentItem || "",
-        Exp_date: ibd.ShelfLifeExpirationDate || "",
-        Manufacture_date: ibd.ManufactureDate || "",
-        Batch: ibd.Batch || "",
+            const huItem = hu._HandlingUnitItem?.[0] || {};
 
-        // ----------------------------
-        // PURCHASE ORDER (ONLY IF PO)
-        // ----------------------------
-        Purchase_Order: isProdOrder ? "" : po?.PurchaseOrder || "",
-        PO_Item:        isProdOrder ? "" : poItem?.PurchaseOrderItem || "",
-        Vendor_Part:    isProdOrder ? "" : poItem?.ManufacturerMaterial || "",
-        Vendor_Code:    isProdOrder ? "" : po?.Supplier || "",
+            const payload = {
+                Order_HU: {
+                    // HU
+                    HU: hu.HandlingUnitExternalID,
+                    barcode: hu.HandlingUnitExternalID,
+                    Pack_Material: hu.PackagingMaterial || "",
+                    Product: huItem.Material || "",
+                    Prod_Desc: huItem.MaterialDescription || "",
 
-        Stock_Category: isProdOrder ? "" :
-            poItem?.StockType === "X" ? "X" : "",
+                    Hu_Quantity: huItem.HandlingUnitQuantity || "",
+                    Uom: huItem.HandlingUnitQuantityUnit || "",
+                    St_Type: hu.StorageType || "",
+                    Storage_Location: hu.StorageLocation || "",
+                    Storage_Bin: hu.StorageBin || "",
 
-        Special_stock: isProdOrder ? "" :
-            poItem?.PurchaseOrderCategory === "K" ? "K" : "",
+                    // IBD
+                    Delivery: ibd.DeliveryDocument,
+                    Delivery_Item: ibd.DeliveryDocumentItem,
+                    Batch: ibd.Batch || "",
 
-        // ----------------------------
-        // PRODUCTION ORDER (TEMP)
-        // ----------------------------
-        Prod_Order: isProdOrder ? prod?.OrderID || "" : "",
-        Int_Serialno: "",
+                    // PO / PROD
+                    Purchase_Order: isProdOrder ? "" : po?.PurchaseOrder || "",
+                    PO_Item:        isProdOrder ? "" : poItem?.PurchaseOrderItem || "",
+                    Vendor_Code:    isProdOrder ? "" : po?.Supplier || "",
+                    Prod_Order:     isProdOrder ? prod?.OrderID || "" : "",
+                    Int_Serialno:   "",
 
-        // GR
-        GR: mat.DocumentNo || "",
-        GR_Qty: mat.QuantityInBaseUnit || "",
-        GR_Date: mat.CreationDate || "",
+                    // GR
+                    GR: mat.DocumentNo,
+                    GR_Qty: mat.QuantityInBaseUnit,
+                    GR_Date: mat.CreationDate,
 
-        // UI
-        CO: data.rfExtras.CO,
-        IE: data.rfExtras.VLot,
-        Label_Format: data.rfExtras.P1,
-        Printer: data.rfExtras.F1,
-        Box: data.rfExtras.Box || "",
-        Plant : ibd.Plant,
-        
-    }
-};
-
-        console.log("📦 FINAL CPI PAYLOAD →", payload);
-
-        // -----------------------------
-        // 3. CPI CALL (CORRECT FORMAT)
-        // -----------------------------
-        const sBaseUrl = sap.ui.require.toUrl("inboundlabel"); // app namespace
-        const sUrl = sBaseUrl + "/http/Bartender/Order";
-
-        const oResponse = await fetch(sUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload)
-        });
-
-        if (oResponse.ok) {
-
-                   try {
-                     await this._postToHULabelService(payload);
-                    console.log("✅ OData POST Successful");
-                } catch (odataError) {
-                    // Log but don't fail entire process
-                    console.warn("⚠️ OData POST Failed (non-critical):", odataError.message);
-                    // Optionally: sap.m.MessageToast.show("Label printed but data save partially failed");
+                    // UI
+                    CO: data.rfExtras.CO,
+                    IE: data.rfExtras.VLot,
+                    Label_Format: data.rfExtras.P1,
+                    Printer: data.rfExtras.F1,
+                    Plant: ibd.Plant || ""
                 }
+            };
 
+            console.log("CPI PAYLOAD →", payload);
 
-            sap.m.MessageBox.success(
-                "Label printed successfully.",
-                {
-                    title: "Print Successful",
-                    onClose: () => {
-                        this.onChangeData(); // clear AFTER success
-                    }
-                }
-            );
-        } else {
-            const errText = await oResponse.text();
-            console.error("❌ CPI Error:", errText);
-            sap.m.MessageBox.error(errText || "Error calling CPI");
+            const resp = await fetch(sCpiUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (!resp.ok) {
+                const err = await resp.text();
+                throw new Error(
+                    `CPI failed for HU ${hu.HandlingUnitExternalID}: ${err}`
+                );
+            }
+
+            // Optional persistence (non-blocking)
+            try {
+                await this._postToHULabelService(payload);
+            } catch (e) {
+                console.warn(
+                    `HU ${hu.HandlingUnitExternalID} saved partially`,
+                    e.message
+                );
+            }
         }
 
+        // --------------------------------------------------
+        // 3️ SUCCESS
+        // --------------------------------------------------
+        sap.m.MessageBox.success(
+            `Latest HU printed successfully (GR ${mat.DocumentNo})`,
+            {
+                title: "Print Successful",
+                onClose: () => this.onChangeData()
+            }
+        );
+
     } catch (err) {
-        console.error("❌ CPI Exception:", err);
+        console.error("Print Flow Error:", err);
         sap.m.MessageBox.error(err.message);
     } finally {
         sap.ui.core.BusyIndicator.hide();
@@ -718,27 +946,27 @@ const prod = isProdOrder ? data.prodOrderDetails : null;
                 const oModel = this.getView().getModel("YY1_hu_label_cds");
 
                 if (!oModel) {
-                    console.error("❌ YY1_hu_label_cds model not found");
+                    console.error("YY1_hu_label_cds model not found");
                     return reject(new Error("HU Label service model not configured in manifest"));
                 }
 
-                // ⚠️ UPDATE THIS with your actual entity set name from metadata
+                // UPDATE THIS with your actual entity set name from metadata
                 const sEntitySet = "/YY1_HU_LABEL";
 
                 
                 // Map payload to OData structure
                 const odataPayload = this._mapPayloadToOData(payload);
 
-                console.log("📤 Posting to OData:", sEntitySet);
-                console.log("📄 OData Payload:", odataPayload);
+                console.log("Posting to OData:", sEntitySet);
+                console.log("OData Payload:", odataPayload);
 
                 oModel.create(sEntitySet, odataPayload, {
                     success: (oData) => {
-                        console.log("✅ OData CREATE Success:", oData);
+                        console.log(" OData CREATE Success:", oData);
                         resolve(oData);
                     },
                     error: (oError) => {
-                        console.error("❌ OData CREATE Error:", oError);
+                        console.error(" OData CREATE Error:", oError);
 
                         // Parse error message
                         let sErrorMsg = "Failed to save to HU Label service";
@@ -763,7 +991,7 @@ const prod = isProdOrder ? data.prodOrderDetails : null;
 
         // ========================================
         // PAYLOAD MAPPING
-        // ⚠️ UPDATE THIS based on your OData metadata
+        //  UPDATE THIS based on your OData metadata
         // ========================================
         _mapPayloadToOData: function (payload) {
             const data = payload.Order_HU;
@@ -781,9 +1009,9 @@ const prod = isProdOrder ? data.prodOrderDetails : null;
     // ========================================
     // MANDATORY FIELDS (REQUIRED!)
     // ========================================
-    GR: t(data.GR || data.GR_No || ""),           // ⚠️ REQUIRED
-    HU: t(data.HU || ""),                          // ⚠️ REQUIRED
-    Plant: t(data.Plant || ""),                    // ⚠️ REQUIRED
+    GR: t(data.GR || data.GR_No || ""),           // REQUIRED
+    HU: t(data.HU || ""),                          // REQUIRED
+    Plant: t(data.Plant || ""),                    // REQUIRED
 
     // ========================================
     // OPTIONAL FIELDS - EXACT METADATA NAMES
@@ -874,7 +1102,7 @@ _truncateString: function (value, maxLength) {
     if (!value) return "";
     const str = String(value);
     if (str.length > maxLength) {
-        console.warn(`⚠️ Truncating "${str}" to ${maxLength} chars`);
+        console.warn(`Truncating "${str}" to ${maxLength} chars`);
         return str.substring(0, maxLength);
     }
     return str;

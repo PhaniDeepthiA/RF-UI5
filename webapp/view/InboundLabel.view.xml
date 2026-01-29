@@ -11,7 +11,7 @@
                     <VBox class="guiFormContainer">
 
                         <!-- HANDLING UNIT -->
-                        <Label text="Handling Unit" class="guiLabel" labelFor="idHu"/>
+                       <Label text="Inbound Label" class="guiLabel" labelFor="idHu"/>
                        <HBox alignItems="Center">
     <Input
         id="idHu"
