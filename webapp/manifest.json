@@ -7,7 +7,7 @@
     "applicationVersion": {
       "version": "0.0.1"
     },
-    "title": "{{GR LABEL PRINT}}",
+    "title": "Inbound Label Print",
     "description": "{{appDescription}}",
     "resources": "resources.json",
     "sourceTemplate": {
@@ -70,6 +70,16 @@
           "odataVersion": "4.0"
         }
       },
+
+        "API_PRODUCT_SRV": {
+        "uri": "/sap/opu/odata/sap/API_PRODUCT_SRV/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/API_PRODUCT_SRV/metadata.xml",
+          "odataVersion": "2.0"
+        }
+      },
       "YY1_HU_LABEL_CDS_VAN": {
         "uri": "/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Annotations(TechnicalName='YY1_HU_LABEL_CDS_VAN',Version='0001')/$value/",
         "type": "ODataAnnotation",
@@ -87,9 +97,8 @@
           "localUri": "localService/YY1_hu_label_cds/metadata.xml",
           "odataVersion": "2.0"
         }
-      },  
-
-       "printerLayoutService": {
+      },
+      "printerLayoutService": {
         "uri": "/sap/opu/odata/sap/YY1_DEF_PRINTER_LAYOUT_cds/",
         "type": "OData",
         "settings": {
@@ -231,14 +240,19 @@
         "settings": {}
       },
       "printerLayout": {
-  "type": "sap.ui.model.odata.v2.ODataModel",
-  "dataSource": "printerLayoutService",
-  "preload": true,
-  "settings": {
-    "defaultOperationMode": "Server",
-    "useBatch": false
-  }
-}
+        "type": "sap.ui.model.odata.v2.ODataModel",
+        "dataSource": "printerLayoutService",
+        "preload": true,
+        "settings": {
+          "defaultOperationMode": "Server",
+          "useBatch": false
+        }
+      },
+      "apiProductService": {
+        "dataSource": "API_PRODUCT_SRV",
+        "preload": true,
+        "settings": {}
+      }
     },
     "resources": {
       "css": [

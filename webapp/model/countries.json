@@ -92,6 +92,7 @@
     { "code": "KW", "name": "Kuwait" },
     { "code": "MY", "name": "Malaysia" },
     { "code": "MX", "name": "Mexico" },
+     { "code": "MO", "name": "Macao" },
     { "code": "NL", "name": "Netherlands" },
     { "code": "NZ", "name": "New Zealand" },
     { "code": "NG", "name": "Nigeria" },
@@ -115,6 +116,7 @@
     { "code": "GB", "name": "United Kingdom" },
     { "code": "US", "name": "United States" },
     { "code": "VN", "name": "Viet Nam" },
-    { "code": "ZW", "name": "Zimbabwe" }
+    { "code": "ZW", "name": "Zimbabwe" },
+    { "code": "TW", "name": "Taiwan" }
   ]
 }

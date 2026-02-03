@@ -28,18 +28,22 @@ server:
       configuration:
         ignoreCertErrors: false # If set to true, certificate errors will be ignored. E.g. self-signed certificates will be accepted
         backend:
-          - url: https://my430117.s4hana.cloud.sap
+          - url: https://my430184.s4hana.cloud.sap
             authenticationType: BasicAuthentication
-            destination: BTPTOS4HC_DEV 
+            destination: INBOUND_LABEL
             path: /sap
           - url: https://my424374-api.s4hana.cloud.sap
             authenticationType: SAMLAssertion
             destination: BTP_S4_BAS_Starter
             path: /sap/opu/odata/sap/YY1_hu_label_cds/
-          - url: https://my430117.s4hana.cloud.sap
+          - url: https://my430184.s4hana.cloud.sap
             authenticationType: BasicAuthentication
-            destination: BTPTOS4HC_DEV 
+            destination: INBOUND_LABEL
             path: /sap/opu/odata/sap/YY1_DEF_PRINTER_LAYOUT_cds/
+          - url: https://my430184.s4hana.cloud.sap
+            authenticationType: BasicAuthentication
+            destination: INBOUND_LABEL
+            path: /sap/opu/odata/sap/API_PRODUCT_SRV/
     - name: sap-fe-mockserver
       beforeMiddleware: csp
       configuration:
@@ -76,6 +80,10 @@ server:
           - urlPath: /sap/opu/odata/sap/YY1_DEF_PRINTER_LAYOUT_cds
             metadataPath: ./webapp/localService/YY1_DEF_PRINTER_LAYOUT_cds/metadata.xml
             mockdataPath: ./webapp/localService/YY1_DEF_PRINTER_LAYOUT_cds/data
+            generateMockData: true
+          - urlPath: /sap/opu/odata/sap/API_PRODUCT_SRV
+            metadataPath: ./webapp/localService/API_PRODUCT_SRV/metadata.xml
+            mockdataPath: ./webapp/localService/API_PRODUCT_SRV/data
             generateMockData: true
         annotations:
           - localPath: ./webapp/localService/YY1_hu_label_cds/YY1_HU_LABEL_CDS_VAN.xml

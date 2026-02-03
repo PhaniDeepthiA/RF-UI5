@@ -46,11 +46,10 @@ sap.ui.define([
 onHuSubmit: function (oEvent) {
     const sHu = oEvent.getParameter("value");
    // if (sHu) this._startHuFlow(sHu);
-
    this._startIbdFlow(sHu);
 },
 
-// onHuChange: function (oEvent) {
+//onHuChange: function (oEvent) {
 //     const sHu = oEvent.getParameter("value");
 //     if (sHu && sHu.length >= 9) this._startHuFlow(sHu);
 // },
@@ -212,14 +211,55 @@ _startIbdFlow: async function (ibd) {
             new Date(matDoc.CreationDate).toISOString()
         );
 
-        // =================================================
-        // 5️ Fetch ALL HUs for IBD (CORRECT LOGIC)
-        // =================================================
-      const huList = await this._fetchHUsForInboundDelivery(ibd);
+
+// ------------------------------------------------
+// 7️⃣ AUTO POPULATE COUNTRY OF ORIGIN (FIXED)
+// ------------------------------------------------
+const ibdItem = oVM.getProperty("/ibdDetails"); // THIS is the IBD item
+
+const material = ibdItem?.Material;
+const plant    = ibdItem?.Plant;
+
+console.log(" Resolving COO for", { material, plant });
+
+if (material && plant) {
+    const country = await this._fetchCountryOfOrigin(material, plant);
+
+    if (country) {
+        this._applyAutoCO(country);
+    } else {
+        console.warn(
+            ` COO not maintained for Material ${material} in Plant ${plant}`
+        );
+    }
+} else {
+    console.error(
+        " Cannot resolve COO — Material or Plant missing",
+        { material, plant }
+    );
+}
+
+ // 7️ FETCH PRINTER / LAYOUT
+
+// const sloc = ibdItem.StorageLocation;
+// const printerCfg = await this._fetchPrinterLayout(plant, sloc);
+// oVM.setProperty("/rfExtras/P1", printerCfg.Printer);
+// oVM.setProperty("/rfExtras/F1", printerCfg.Layout);
+
+// console.log("Printer/Layout resolved →", printerCfg);
+
+ // =================================================
+ // 5️ Fetch ALL HUs for IBD (CORRECT LOGIC)
+// =================================================
+     
+const huList = await this._fetchHUsForInboundDelivery(ibd);
 
 const latestHUs = this._getLatestHUs(huList);
 
 oVM.setProperty("/huList", latestHUs);
+
+console.log("fetched Hus are →", latestHUs);
+
 
 console.log(
     `${latestHUs.length} latest HUs selected for GR ${matDoc.DocumentNo}`
@@ -231,6 +271,53 @@ console.log(
     } finally {
         sap.ui.core.BusyIndicator.hide();
     }
+},
+
+_fetchCountryOfOrigin: function (material, plant) {
+    return new Promise((resolve, reject) => {
+        const oModel = this.getView().getModel("apiProductService"); // API_PRODUCT_SRV
+
+        const sPath = `/A_Product('${material}')/to_Plant`;
+        const mParams = {
+            "$filter": `Plant eq '${plant}'`
+        };
+
+        console.log(` Fetching COO for Material ${material}, Plant ${plant}`);
+
+        oModel.read(sPath, {
+            urlParameters: mParams,
+            success: (oData) => {
+                const result = oData?.results?.[0];
+
+                if (result?.CountryOfOrigin) {
+                    resolve(result.CountryOfOrigin);
+                } else {
+                    resolve(""); // Not maintained
+                }
+            },
+            error: (err) => {
+                console.error("COO fetch failed", err);
+                reject(err);
+            }
+        });
+    });
+},
+
+_applyAutoCO: function (countryCode) {
+    const oVM = this.getView().getModel("view");
+
+    if (!countryCode) {
+        console.warn("⚠️ No Country of Origin found in product");
+        return;
+    }
+
+    console.log("✅ Auto Country of Origin:", countryCode);
+
+    // Set value
+    oVM.setProperty("/rfExtras/CO", countryCode.toUpperCase());
+
+    // Mark as valid (your onCOChange will still re-validate on edit)
+    oVM.setProperty("/rfExtras/COValid", true);
 },
 
 _getLatestHUs: function (huList) {
@@ -310,21 +397,21 @@ _fetchHUsForInboundDelivery: async function (ibd) {
         throw new Error("HU service model not found");
     }
 
-    // CORRECT: clean entity set path
     const sPath = "/HandlingUnit";
 
     console.log("HU LIST BASE PATH →", sPath);
 
-    // CORRECT: filter goes into parameters
     const oBinding = oModel.bindList(sPath, null, null, null, {
-        $filter: `HandlingUnitReferenceDocument eq '${ibd}' and Warehouse eq '${warehouse}'`
+        $filter: `HandlingUnitReferenceDocument eq '${ibd}' and Warehouse eq '${warehouse}'`,
+        $expand: {
+            _HandlingUnitItem: {}   
+        }
     });
 
     const aContexts = await oBinding.requestContexts(0, 200);
-
     const aHUs = aContexts.map(ctx => ctx.getObject());
 
-    console.log(`${aHUs.length} HUs fetched for IBD ${ibd}`);
+    console.log(`✅ ${aHUs.length} HU HEADERS fetched with ITEMS`);
 
     return aHUs;
 },
@@ -735,7 +822,7 @@ _fetchMaterialDocumentItem: async function (doc, year, item) {
         //---------------------------------------------------------------------
         // PURCHASE ORDER LOADER (From your old project)
         //---------------------------------------------------------------------
- loadPurchaseOrderData: async function (model, purchaseOrderNumber) {
+loadPurchaseOrderData: async function (model, purchaseOrderNumber) {
             try {
                 const po = await this.getPurchaseOrder(model, purchaseOrderNumber);
                 const items = await this.getPurchaseOrderItems(model, purchaseOrderNumber);
@@ -851,7 +938,10 @@ onPrintProgram: async function () {
         // --------------------------------------------------
         // 2️ PRINT ONLY LATEST HU(s)
         // --------------------------------------------------
-        for (const hu of data.huList) {
+        const totalHUs = data.huList.length;
+
+      for (let i = 0; i < totalHUs; i++) {
+       const hu = data.huList[i];
 
             const huItem = hu._HandlingUnitItem?.[0] || {};
 
@@ -861,13 +951,13 @@ onPrintProgram: async function () {
                     HU: hu.HandlingUnitExternalID,
                     barcode: hu.HandlingUnitExternalID,
                     Pack_Material: hu.PackagingMaterial || "",
-                    Product: huItem.Material || "",
-                    Prod_Desc: huItem.MaterialDescription || "",
+                    Product: ibd.Material || "",
+                    Prod_Desc: ibd.DeliveryDocumentItemText || "",
 
                     Hu_Quantity: huItem.HandlingUnitQuantity || "",
-                    Uom: huItem.HandlingUnitQuantityUnit || "",
+                    Uom: huItem.HandlingUnitAltUnitOfMeasure || "",
                     St_Type: hu.StorageType || "",
-                    Storage_Location: hu.StorageLocation || "",
+                    Storage_Location: ibd.StorageLocation || "",
                     Storage_Bin: hu.StorageBin || "",
 
                     // IBD
@@ -892,11 +982,29 @@ onPrintProgram: async function () {
                     IE: data.rfExtras.VLot,
                     Label_Format: data.rfExtras.P1,
                     Printer: data.rfExtras.F1,
-                    Plant: ibd.Plant || ""
+                    Plant: ibd.Plant || "",
+    
+                     // ---- Vendor / Manufacturer ----
+            Vendor_Part: isProdOrder ? "" : poItem?.ManufacturerMaterial || "",
+            
+
+            // ---- Dates ----
+            Manufacture_date: ibd.ManufactureDate || "",
+            Exp_date: ibd.ShelfLifeExpirationDate || "",
+
+            // ---- Stock Indicators ----
+            Stock_Category:
+                isProdOrder ? "" :
+                ibd.StockType === "X" ? "X" : "",
+
+            Special_stock:
+                isProdOrder ? "" :
+                ibd.SpecialStockType || "",
+                Box : `${i + 1} of ${totalHUs}`
                 }
             };
 
-            console.log("CPI PAYLOAD →", payload);
+            console.log("CPI PAYLOAD in OnPrint →", payload);
 
             const resp = await fetch(sCpiUrl, {
                 method: "POST",
@@ -912,21 +1020,21 @@ onPrintProgram: async function () {
             }
 
             // Optional persistence (non-blocking)
-            try {
-                await this._postToHULabelService(payload);
-            } catch (e) {
-                console.warn(
-                    `HU ${hu.HandlingUnitExternalID} saved partially`,
-                    e.message
-                );
-            }
+            // try {
+            //     await this._postToHULabelService(payload);
+            // } catch (e) {
+            //     console.warn(
+            //         `HU ${hu.HandlingUnitExternalID} saved partially`,
+            //         e.message
+            //     );
+            // }
         }
 
         // --------------------------------------------------
         // 3️ SUCCESS
         // --------------------------------------------------
         sap.m.MessageBox.success(
-            `Latest HU printed successfully (GR ${mat.DocumentNo})`,
+            `HU Labels printed successfully`,
             {
                 title: "Print Successful",
                 onClose: () => this.onChangeData()
@@ -941,53 +1049,53 @@ onPrintProgram: async function () {
     }
 },
 
- _postToHULabelService: function (payload) {
-            return new Promise((resolve, reject) => {
-                const oModel = this.getView().getModel("YY1_hu_label_cds");
+//  _postToHULabelService: function (payload) {
+//             return new Promise((resolve, reject) => {
+//                 const oModel = this.getView().getModel("YY1_hu_label_cds");
 
-                if (!oModel) {
-                    console.error("YY1_hu_label_cds model not found");
-                    return reject(new Error("HU Label service model not configured in manifest"));
-                }
+//                 if (!oModel) {
+//                     console.error("YY1_hu_label_cds model not found");
+//                     return reject(new Error("HU Label service model not configured in manifest"));
+//                 }
 
-                // UPDATE THIS with your actual entity set name from metadata
-                const sEntitySet = "/YY1_HU_LABEL";
+//                 // UPDATE THIS with your actual entity set name from metadata
+//                 const sEntitySet = "/YY1_HU_LABEL";
 
                 
-                // Map payload to OData structure
-                const odataPayload = this._mapPayloadToOData(payload);
+//                 // Map payload to OData structure
+//                 const odataPayload = this._mapPayloadToOData(payload);
 
-                console.log("Posting to OData:", sEntitySet);
-                console.log("OData Payload:", odataPayload);
+//                 console.log("Posting to OData:", sEntitySet);
+//                 console.log("OData Payload:", odataPayload);
 
-                oModel.create(sEntitySet, odataPayload, {
-                    success: (oData) => {
-                        console.log(" OData CREATE Success:", oData);
-                        resolve(oData);
-                    },
-                    error: (oError) => {
-                        console.error(" OData CREATE Error:", oError);
+//                 oModel.create(sEntitySet, odataPayload, {
+//                     success: (oData) => {
+//                         console.log(" OData CREATE Success:", oData);
+//                         resolve(oData);
+//                     },
+//                     error: (oError) => {
+//                         console.error(" OData CREATE Error:", oError);
 
-                        // Parse error message
-                        let sErrorMsg = "Failed to save to HU Label service";
+//                         // Parse error message
+//                         let sErrorMsg = "Failed to save to HU Label service";
 
-                        if (oError.responseText) {
-                            try {
-                                const oErrorResponse = JSON.parse(oError.responseText);
-                                sErrorMsg = oErrorResponse.error?.message?.value ||
-                                    oErrorResponse.error?.innererror?.errordetails?.[0]?.message ||
-                                    sErrorMsg;
-                            } catch (e) {
-                                sErrorMsg = oError.message || oError.statusText || sErrorMsg;
-                            }
-                        }
+//                         if (oError.responseText) {
+//                             try {
+//                                 const oErrorResponse = JSON.parse(oError.responseText);
+//                                 sErrorMsg = oErrorResponse.error?.message?.value ||
+//                                     oErrorResponse.error?.innererror?.errordetails?.[0]?.message ||
+//                                     sErrorMsg;
+//                             } catch (e) {
+//                                 sErrorMsg = oError.message || oError.statusText || sErrorMsg;
+//                             }
+//                         }
 
-                        console.error("Error details:", sErrorMsg);
-                        reject(new Error(sErrorMsg));
-                    }
-                });
-            });
-        },
+//                         console.error("Error details:", sErrorMsg);
+//                         reject(new Error(sErrorMsg));
+//                     }
+//                 });
+//             });
+//         },
 
         // ========================================
         // PAYLOAD MAPPING

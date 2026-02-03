@@ -6,7 +6,7 @@
     {
       "source": "^/sap/opu/odata4/(.*)$",
       "target": "/sap/opu/odata4/$1",
-      "destination": "BTPTOS4HC_DEV ",
+      "destination": "INBOUND_LABEL",
       "authenticationType": "xsuaa",
       "csrfProtection": false
     },
@@ -14,7 +14,7 @@
       {
       "source": "^/sap/opu/odata/(.*)$",
       "target": "/sap/opu/odata/$1",
-      "destination": "BTPTOS4HC_DEV ",
+      "destination": "INBOUND_LABEL",
       "authenticationType": "xsuaa",
       "csrfProtection": true
     },
@@ -22,7 +22,7 @@
     {
       "source": "^/http/(.*)$",
       "target": "/http/$1",
-      "destination": "CPI_HU_LABEL",
+      "destination": "INBOUND_LABEL_CPI",
       "authenticationType": "none",
       "csrfProtection": false
     },
