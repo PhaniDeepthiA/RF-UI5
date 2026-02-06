@@ -11,8 +11,7 @@ sap.ui.define([
         onInit: function () {
             const oVM = new JSONModel({
                 HuData: "",
-                Warehouse: "PU01",
-
+                Warehouse: "",
                 rfExtras: {
                     CO: "",
                     VLot: "",
@@ -44,9 +43,51 @@ sap.ui.define([
         },
 
 onHuSubmit: function (oEvent) {
-    const sHu = oEvent.getParameter("value");
-   // if (sHu) this._startHuFlow(sHu);
-   this._startIbdFlow(sHu);
+    const oVM = this.getView().getModel("view");
+    const ibd = (oEvent.getParameter("value") || "").trim();
+
+    oVM.setProperty("/HuData", ibd);
+
+    this._tryStartIbdFlow();
+},
+
+onWarehouseChange: function (oEvent) {
+    const oVM = this.getView().getModel("view");
+    const warehouse = (oEvent.getParameter("value") || "").trim();
+
+    oVM.setProperty("/Warehouse", warehouse);
+
+    this._tryStartIbdFlow();
+},
+
+
+_tryStartIbdFlow: function () {
+    const oVM = this.getView().getModel("view");
+
+    const ibd = oVM.getProperty("/HuData");
+    const warehouse = oVM.getProperty("/Warehouse");
+
+    // HARD GATE
+    if (!ibd || !warehouse) {
+        console.log("⏳ Waiting for inputs", { ibd, warehouse });
+        return;
+    }
+
+    // Prevent double-trigger
+    if (oVM.getProperty("/isLoading")) {
+        console.log("⏸ Flow already running");
+        return;
+    }
+
+    oVM.setProperty("/isLoading", true);
+
+    console.log("🚀 All inputs ready. Starting IBD Flow", {
+        ibd,
+        warehouse
+    });
+
+    this._startIbdFlow(ibd)
+        .finally(() => oVM.setProperty("/isLoading", false));
 },
 
 //onHuChange: function (oEvent) {
@@ -124,6 +165,22 @@ onCOChange: function (oEvent) {
     // VALID
     oInput.setValueState("None");
     oViewModel.setProperty("/rfExtras/COValid", true);
+},
+
+onWarehouseSubmit: function (oEvent) {
+    const oVM = this.getView().getModel("view");
+    const wh = (oEvent.getParameter("value") || "").trim();
+
+    if (!wh) {
+        return;
+    }
+
+    oVM.setProperty("/Warehouse", wh);
+
+    console.log("✅ Warehouse captured:", wh);
+
+    // 🔐 Gatekeeper decides whether flow can start
+    this._tryStartIbdFlow();
 },
 
 _startIbdFlow: async function (ibd) {
@@ -391,7 +448,8 @@ _fetchHUsForMaterialDoc: async function (materialDoc) {
 },
 _fetchHUsForInboundDelivery: async function (ibd) {
     const oModel = this.getView().getModel("huService");
-    const warehouse = "PU01";
+    const oVM = this.getView().getModel("view");
+   const warehouse = oVM.getProperty("/Warehouse");
 
     if (!oModel) {
         throw new Error("HU service model not found");
@@ -586,12 +644,13 @@ _extractHUsForMaterialDoc: function (docFlow, matDocNo, matDocYear) {
         // HU READ (V4)
         //---------------------------------------------------------------------
  _fetchHUDetails: async function (sHu) {
-    const oVM = this.getView().getModel("view");
 
     try {
         const oModel = this.getView().getModel("huService");
 
-        const warehouse = "PU01";
+        const oVM = this.getView().getModel("view");
+
+        const warehouse = oVM.getProperty("/Warehouse");
 
         const sPath =
             `/HandlingUnit(HandlingUnitExternalID='${sHu}',Warehouse='${warehouse}')` +

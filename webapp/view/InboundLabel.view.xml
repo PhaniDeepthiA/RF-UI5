@@ -34,6 +34,8 @@
     id="idWh"
     value="{view>/Warehouse}"
     maxLength="4"
+     change="onWarehouseChange"
+    submit="onWarehouseSubmit"
     class="guiInput guiEditable"
 />
 </HBox>

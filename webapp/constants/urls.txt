@@ -1,0 +1,143 @@
+
+
+① Fetch Inbound Delivery Items
+
+ _fetchInboundDelivery
+
+GET
+https://my430117.s4hana.cloud.sap/sap/opu/odata/sap/API_INBOUND_DELIVERY_SRV;v=0002
+/A_InbDeliveryHeader('180000088')/to_DeliveryDocumentItem
+
+✔ Expected:
+	•	Material
+	•	Plant
+	•	StorageLocation
+	•	DeliveryDocumentItem
+	•	ReferenceSDDocument (PO)
+	•	DeliveryDocumentItemCategory
+
+If this fails → nothing else matters
+
+⸻
+
+② Fetch Document Flow for IBD Item
+
+ _fetchDocumentFlow
+
+GET
+https://my430117.s4hana.cloud.sap/sap/opu/odata/sap/API_INBOUND_DELIVERY_SRV;v=0002
+/A_InbDeliveryItem(
+  DeliveryDocument='180000088',
+  DeliveryDocumentItem='000010'
+)/to_DocumentFlow
+
+✔ Expected:
+	•	Entries with
+SubsequentDocumentCategory = 'R' (GR)
+	•	SubsequentDocument
+	•	SubsequentDocumentItem
+
+⚠️ Partial GR MAY return empty → this is normal
+
+⸻
+
+③ Fetch Material Document ITEM
+
+ _fetchMaterialDocumentItem (item)
+
+GET
+https://my430117.s4hana.cloud.sap/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV
+/A_MaterialDocumentItem(
+  MaterialDocument='5000000174',
+  MaterialDocumentYear='2026',
+  MaterialDocumentItem='0001'
+)
+
+✔ Expected:
+	•	QuantityInBaseUnit
+	•	MaterialDocument
+
+⸻
+
+④ Fetch Material Document HEADER
+
+👉 same method (header)
+
+GET
+https://my430117.s4hana.cloud.sap/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV
+/A_MaterialDocumentHeader(
+  MaterialDocument='5000000174',
+  MaterialDocumentYear='2026'
+)
+
+✔ Expected:
+	•	CreationDate
+
+
+⑤ Fetch Handling Units for IBD
+
+⚠️ This is the critical RF call
+
+GET
+https://my430117.s4hana.cloud.sap/sap/opu/odata4/sap/api_handlingunit
+/srvd_a2x/sap/handlingunit/0001/HandlingUnit
+?$filter=HandlingUnitReferenceDocument eq '180000088'
+and Warehouse eq 'PU01'
+&$expand=_HandlingUnitItem
+
+✔ Expected:
+	•	Multiple HUs for partial GR
+	•	CreationDateTime present
+	•	_HandlingUnitItem populated
+
+❌ If empty:
+	•	HU was created before GR
+	•	or reference is not IBD
+	•	or HU already consumed
+
+⑥ Fetch HU directly (debug / fallback)
+
+👉 _fetchHUDetails
+
+GET
+https://my430117.s4hana.cloud.sap/sap/opu/odata4/sap/api_handlingunit
+/srvd_a2x/sap/handlingunit/0001/HandlingUnit(
+  HandlingUnitExternalID='300000269',
+  Warehouse='PU01'
+)
+?$expand=_HandlingUnitItem
+
+✔ Use this to prove HU exists
+✔ If this works but step ⑤ doesn’t → reference mismatch confirmed
+
+⸻
+
+⑦ Fetch Purchase Order
+
+👉 _fetchPO
+
+GET
+https://my430117.s4hana.cloud.sap/sap/opu/odata4/sap/api_purchaseorder_2
+/PurchaseOrder('4500000226')
+?$expand=_PurchaseOrderItem
+
+✔ Expected:
+	•	Supplier
+	•	PurchaseOrderItem
+	•	ManufacturerMaterial
+
+⸻
+
+⑧ Fetch Country of Origin
+
+👉 _fetchCountryOfOrigin
+
+GET
+https://my430117.s4hana.cloud.sap/sap/opu/odata/sap/API_PRODUCT_SRV
+/A_Product('RM19')/to_Plant?$filter=Plant eq 'CNP1'
+
+✔ Expected:
+	•	CountryOfOrigin
+
+⸻
+
