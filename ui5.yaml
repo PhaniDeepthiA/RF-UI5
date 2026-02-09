@@ -40,20 +40,30 @@ server:
           - path: /sap/opu/odata4/sap/api_whse_inb_delivery_2/srvd_a2x/sap/warehouseinbounddelivery/0001/
             url: https://my430184.s4hana.cloud.sap
             destination: INBOUND_LABEL
-            
+
           - path: /sap/opu/odata/sap/API_PRODUCT_SRV/
             url: https://my430184.s4hana.cloud.sap
             destination: INBOUND_LABEL
 
           - path: /http
             destination: INBOUND_LABEL_CPI
-            
+
           - url: https://my430184.s4hana.cloud.sap
             authenticationType: BasicAuthentication
             destination: INBOUND_LABEL
             path: /sap
-          
-       
+          - url: https://my430184.s4hana.cloud.sap
+            authenticationType: BasicAuthentication
+            destination: INBOUND_LABEL
+            path: /sap/opu/odata/sap/YY1_LBL_FORM_SHIPTO_CDS/
+          - url: https://my430184.s4hana.cloud.sap
+            authenticationType: BasicAuthentication
+            destination: INBOUND_LABEL
+            path: /sap/opu/odata/sap/YY1_LBL_FORM_PLANT_CDS/
+          - url: https://my430184.s4hana.cloud.sap
+            authenticationType: BasicAuthentication
+            destination: INBOUND_LABEL
+            path: /sap/opu/odata/sap/YY1_DEF_PRINTER_cds/
 
     # 2) LIVE reload
     - name: fiori-tools-appreload
@@ -62,4 +72,3 @@ server:
         port: 35729
         path: webapp
         delay: 300
-

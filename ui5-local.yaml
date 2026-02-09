@@ -39,11 +39,23 @@ server:
           - url: https://my430184.s4hana.cloud.sap
             authenticationType: BasicAuthentication
             destination: INBOUND_LABEL
-            path: /sap/opu/odata/sap/YY1_DEF_PRINTER_LAYOUT_cds/
+            path: /sap/opu/odata/sap/YY1_DEF_PRINTER_cds/
           - url: https://my430184.s4hana.cloud.sap
             authenticationType: BasicAuthentication
             destination: INBOUND_LABEL
             path: /sap/opu/odata/sap/API_PRODUCT_SRV/
+          - url: https://my430184.s4hana.cloud.sap
+            authenticationType: BasicAuthentication
+            destination: INBOUND_LABEL
+            path: /sap/opu/odata/sap/YY1_LBL_FORM_SHIPTO_CDS/
+          - url: https://my430184.s4hana.cloud.sap
+            authenticationType: BasicAuthentication
+            destination: INBOUND_LABEL
+            path: /sap/opu/odata/sap/YY1_LBL_FORM_PLANT_CDS/
+          - url: https://my430184.s4hana.cloud.sap
+            authenticationType: BasicAuthentication
+            destination: INBOUND_LABEL
+            path: /sap/opu/odata/sap/YY1_DEF_PRINTER_cds/
     - name: sap-fe-mockserver
       beforeMiddleware: csp
       configuration:
@@ -73,17 +85,29 @@ server:
             metadataPath: ./webapp/localService/handlingUnitService/metadata.xml
             mockdataPath: ./webapp/localService/handlingUnitService/data
             generateMockData: true
+          - urlPath: /sap/opu/odata/sap/API_PRODUCT_SRV
+            metadataPath: ./webapp/localService/API_PRODUCT_SRV/metadata.xml
+            mockdataPath: ./webapp/localService/API_PRODUCT_SRV/data
+            generateMockData: true
           - urlPath: /sap/opu/odata/sap/YY1_hu_label_cds
             metadataPath: ./webapp/localService/YY1_hu_label_cds/metadata.xml
             mockdataPath: ./webapp/localService/YY1_hu_label_cds/data
             generateMockData: true
-          - urlPath: /sap/opu/odata/sap/YY1_DEF_PRINTER_LAYOUT_cds
-            metadataPath: ./webapp/localService/YY1_DEF_PRINTER_LAYOUT_cds/metadata.xml
-            mockdataPath: ./webapp/localService/YY1_DEF_PRINTER_LAYOUT_cds/data
+          - urlPath: /sap/opu/odata/sap/YY1_DEF_PRINTER_cds
+            metadataPath: ./webapp/localService/printerLayoutService/metadata.xml
+            mockdataPath: ./webapp/localService/printerLayoutService/data
             generateMockData: true
-          - urlPath: /sap/opu/odata/sap/API_PRODUCT_SRV
-            metadataPath: ./webapp/localService/API_PRODUCT_SRV/metadata.xml
-            mockdataPath: ./webapp/localService/API_PRODUCT_SRV/data
+          - urlPath: /sap/opu/odata/sap/YY1_LBL_FORM_SHIPTO_CDS
+            metadataPath: ./webapp/localService/YY1_LBL_FORM_SHIPTO_CDS/metadata.xml
+            mockdataPath: ./webapp/localService/YY1_LBL_FORM_SHIPTO_CDS/data
+            generateMockData: true
+          - urlPath: /sap/opu/odata/sap/YY1_LBL_FORM_PLANT_CDS
+            metadataPath: ./webapp/localService/YY1_LBL_FORM_PLANT_CDS/metadata.xml
+            mockdataPath: ./webapp/localService/YY1_LBL_FORM_PLANT_CDS/data
+            generateMockData: true
+          - urlPath: /sap/opu/odata/sap/YY1_DEF_PRINTER_cds
+            metadataPath: ./webapp/localService/YY1_DEF_PRINTER_cds/metadata.xml
+            mockdataPath: ./webapp/localService/YY1_DEF_PRINTER_cds/data
             generateMockData: true
         annotations:
           - localPath: ./webapp/localService/YY1_hu_label_cds/YY1_HU_LABEL_CDS_VAN.xml

@@ -70,8 +70,7 @@
           "odataVersion": "4.0"
         }
       },
-
-        "API_PRODUCT_SRV": {
+      "API_PRODUCT_SRV": {
         "uri": "/sap/opu/odata/sap/API_PRODUCT_SRV/",
         "type": "OData",
         "settings": {
@@ -103,10 +102,37 @@
         "type": "OData",
         "settings": {
           "annotations": [],
+          "localUri": "localService/printerLayoutService/metadata.xml",
+          "odataVersion": "2.0"
+        }
+      },
+      "YY1_LBL_FORM_SHIPTO_CDS": {
+        "uri": "/sap/opu/odata/sap/YY1_LBL_FORM_SHIPTO_CDS/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/YY1_LBL_FORM_SHIPTO_CDS/metadata.xml",
+          "odataVersion": "2.0"
+        }
+      },
+      "YY1_LBL_FORM_PLANT_CDS": {
+        "uri": "/sap/opu/odata/sap/YY1_LBL_FORM_PLANT_CDS/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/YY1_LBL_FORM_PLANT_CDS/metadata.xml",
+          "odataVersion": "2.0"
+        }
+      },
+      "YY1_DEF_PRINTER_cds": {
+        "uri": "/sap/opu/odata/sap/YY1_DEF_PRINTER_cds/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "localUri": "localService/YY1_DEF_PRINTER_cds/metadata.xml",
           "odataVersion": "2.0"
         }
       }
-    
     }
   },
   "sap.ui": {
@@ -250,6 +276,26 @@
       },
       "apiProductService": {
         "dataSource": "API_PRODUCT_SRV",
+        "preload": true,
+        "settings": {}
+      },
+      "YY1_LBL_FORM_SHIPTO_CDS": {
+        "dataSource": "YY1_LBL_FORM_SHIPTO_CDS",
+        "preload": true,
+        "settings": {}
+      },
+      "YY1_LBL_FORM_PLANT_CDS": {
+        "dataSource": "YY1_LBL_FORM_PLANT_CDS",
+        "preload": true,
+        "settings": {}
+      },
+      "printerLayoutService": {
+        "dataSource": "printerLayoutService",
+        "preload": true,
+        "settings": {}
+      },
+      "YY1_DEF_PRINTER_cds": {
+        "dataSource": "YY1_DEF_PRINTER_cds",
         "preload": true,
         "settings": {}
       }

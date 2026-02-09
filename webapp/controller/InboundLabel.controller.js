@@ -62,9 +62,11 @@ onWarehouseChange: function (oEvent) {
 
 
 _tryStartIbdFlow: function () {
-    const oVM = this.getView().getModel("view");
-
+    
+const oVM = this.getView().getModel("view"); 
     const ibd = oVM.getProperty("/HuData");
+
+    
     const warehouse = oVM.getProperty("/Warehouse");
 
     // HARD GATE
@@ -267,7 +269,7 @@ _startIbdFlow: async function (ibd) {
             "Latest GR timestamp:",
             new Date(matDoc.CreationDate).toISOString()
         );
-
+      
 
 // ------------------------------------------------
 // 7️⃣ AUTO POPULATE COUNTRY OF ORIGIN (FIXED)
@@ -298,12 +300,30 @@ if (material && plant) {
 
  // 7️ FETCH PRINTER / LAYOUT
 
-// const sloc = ibdItem.StorageLocation;
-// const printerCfg = await this._fetchPrinterLayout(plant, sloc);
-// oVM.setProperty("/rfExtras/P1", printerCfg.Printer);
+try {
+    const sloc = ibdItem.StorageLocation;
+
+    const printerCfg = await this._fetchPrinterLayout(plant, sloc);
+
+    oVM.setProperty("/rfExtras/P1", printerCfg.Printer || "");
+    console.log("Printer resolved →", printerCfg);
+
+} catch (e) {
+    console.warn(
+        `No printer config for Plant=${plant}, Sloc=${sloc}. User will enter manually.`
+    );
+    oVM.setProperty("/rfExtras/P1", "");
+}
+
+
+// 7️_fetch LABEL FORMAT
+
+const labelFormatCfg = await this._fetchLabel_format(plant, sloc);
+oVM.setProperty("/rfExtras/F1", labelFormatCfg.Label_format);
 // oVM.setProperty("/rfExtras/F1", printerCfg.Layout);
 
-// console.log("Printer/Layout resolved →", printerCfg);
+console.log("Printer/Layout resolved →", labelFormatCfg);
+
 
  // =================================================
  // 5️ Fetch ALL HUs for IBD (CORRECT LOGIC)
@@ -504,145 +524,7 @@ _extractHUsForMaterialDoc: function (docFlow, matDocNo, matDocYear) {
         )
         .map(e => e.SubsequentDocument);
 },
-// _startHuFlow: async function (sHu) {
-//     const oVM = this.getView().getModel("view");
 
-//     try {
-//         sap.ui.core.BusyIndicator.show(0);
-//         console.log("Starting HU → IBD → PO → DocFlow → MatDoc pipeline");
-
-//         // --------------------------
-//         // 1 FETCH HU DETAILS
-//         // --------------------------
-//         const hu = await this._fetchHUDetails(sHu);
-//         if (!hu) throw new Error("HU fetch failed. Stopping pipeline.");
-
-//         console.log("HU OK →", hu);
-//         oVM.setProperty("/huDetails", hu);
-
-//         // Extract IBD number from HU
-//         const ibd = hu.HandlingUnitReferenceDocument;
-//         if (!ibd) throw new Error("IBD missing inside HU response");
-
-//         console.log("IBD extracted:", ibd);
-//         oVM.setProperty("/ibd", ibd); // raw number (if you want it)
-
-//         // --------------------------
-//         // 2️ FETCH INBOUND DELIVERY ITEMS
-//         // --------------------------
-//         const ibdItems = await this._fetchInboundDelivery(ibd);
-//         if (!ibdItems || ibdItems.length === 0) {
-//             throw new Error("No Inbound Delivery Items returned.");
-//         }
-
-//         console.log("IBD Items OK →", ibdItems);
-//         oVM.setProperty("/ibdItems", ibdItems);
-
-//         // take first item for payload usage
-//         const firstItem = ibdItems[0];
-//         oVM.setProperty("/ibdDetails", firstItem);   // ⬅ this is what onPrintProgram expects
-
-//         // --------------------------
-//         // 3️ FETCH PO USING IBD → ReferenceSDDocument
-//         // --------------------------
-//       const isProdOrder = firstItem.DeliveryDocumentItemCategory === "DIGN";
-// oVM.setProperty("/isProdOrder", isProdOrder);
-
-// if (isProdOrder) {
-//     // Production Order — NO API CALL
-//     const prodDetails = {
-//         OrderID: firstItem.OrderID,
-//         OrderItem: firstItem.OrderItem
-//     };
-
-//     console.log("Production Order detected →", prodDetails);
-//     oVM.setProperty("/prodOrderDetails", prodDetails);
-
-// } else {
-//     // Purchase Order — EXISTING FLOW
-//     const poNumber = firstItem.ReferenceSDDocument;
-
-//     if (poNumber) {
-//         console.log("Fetching PO:", poNumber);
-
-//         const poDetails = await this._fetchPO(poNumber);
-//         oVM.setProperty("/poDetails", poDetails);
-
-//     } else {
-//         console.warn("No PO found in IBD Item");
-//     }
-// }
-
-//         // --------------------------
-//         // 4️ FETCH DOCUMENT FLOW
-//         // --------------------------
-//         console.log(`Calling DocFlow for IBD=${ibd}, Item=${firstItem.DeliveryDocumentItem}`);
-
-//         const docFlow = await this._fetchDocumentFlow(
-//             ibd,
-//             firstItem.DeliveryDocumentItem
-//         );
-
-//         if (!docFlow) {
-//             throw new Error("Document Flow is empty");
-//         }
-
-//         console.log("DOC FLOW ENTRY →", docFlow);
-//         oVM.setProperty("/docFlow", docFlow);
-
-//         // --------------------------
-//         // 5️ EXTRACT MATERIAL DOCUMENT FROM DOC FLOW
-//         // --------------------------
-//         const matDocInfo = this._extractMaterialDocument(docFlow);
-
-//         if (!matDocInfo) {
-//             console.warn("No Material Document found in Document Flow");
-//             oVM.setProperty("/matDoc", null);
-//         } else {
-//             console.log("Material Doc Keys:", matDocInfo);
-
-//             // --------------------------
-//             // 6️ FETCH MATERIAL DOCUMENT ITEM
-//             // --------------------------
-
-
-            
-//             const matDocItem = await this._fetchMaterialDocumentItem(
-//                 matDocInfo.MaterialDocument,
-//                 matDocInfo.Year,
-//                 matDocInfo.MaterialDocumentItem
-//             );
-
-//             console.log("MATERIAL DOCUMENT ITEM OK:", matDocItem);
-//             oVM.setProperty("/matDoc", matDocItem);
-//         }
-
-
-//         // --------------------------
-// // 7️ FETCH PRINTER / LAYOUT
-// // --------------------------
-// // const plant = ibd.Plant;
-// // const sloc = ibd.StorageLocation;
-
-// // const printerCfg = await this._fetchPrinterLayout(plant, sloc);
-
-// // oVM.setProperty("/rfExtras/P1", printerCfg.Layout);
-// // oVM.setProperty("/rfExtras/F1", printerCfg.Printer);
-
-// // console.log("Printer/Layout resolved →", printerCfg);
-
-//         sap.m.MessageToast.show("All data loaded successfully!");
-
-//     } catch (err) {
-//         console.error("Pipeline Error →", err);
-//         sap.m.MessageBox.error(err.message);
-
-//     } finally {
-//         sap.ui.core.BusyIndicator.hide();
-//     }
-// },   //---------------------------------------------------------------------
-        // HU READ (V4)
-        //---------------------------------------------------------------------
  _fetchHUDetails: async function (sHu) {
 
     try {
@@ -898,16 +780,18 @@ loadPurchaseOrderData: async function (model, purchaseOrderNumber) {
         },
 
 _fetchPrinterLayout: function (plant, sloc) {
-    const oModel = this.getOwnerComponent().getModel("printerLayout");
+    const oModel = this.getOwnerComponent().getModel("YY1_DEF_PRINTER_cds");
 
     if (!oModel) {
         console.error("Printer Layout model not found");
         return Promise.reject("Printer Layout model missing");
     }
 
-    const sPath = "/YY1_DEF_PRINTER_LAYOUT";
+        //   "$filter": `Process eq 'HU_INBOUND' and Plant eq '${plant}' and Sloc eq '${sloc}'`
+
+    const sPath = "/YY1_DEF_PRINTER";
     const mParams = {
-        "$filter": `Plant eq '${plant}' and Sloc eq '${sloc}'`
+       "$filter": `Process eq 'HU_INBOUND' and Plant eq '${plant}' and Sloc eq '${sloc}'`
     };
 
     console.log("Printer/Layout PATH →", sPath, mParams);
@@ -929,6 +813,42 @@ _fetchPrinterLayout: function (plant, sloc) {
         });
     });
 },
+
+_fetchLabel_format: function (plant, sloc) {
+    const oModel = this.getOwnerComponent().getModel("YY1_LBL_FORM_PLANT_CDS");
+
+    if (!oModel) {
+        console.error("Printer Layout model not found");
+        return Promise.reject("Printer Layout model missing");
+    }
+
+        //   "$filter": `Process eq 'HU_INBOUND' and Plant eq '${plant}' and Sloc eq '${sloc}'`
+
+    const sPath = "/YY1_LBL_FORM_PLANT";
+    const mParams = {
+       "$filter": `Process eq 'HU_INBOUND' and Plant eq '${plant}' and Sloc eq 'Test'`
+    };
+
+    console.log("Label_format PATH →", sPath, mParams);
+
+    return new Promise((resolve, reject) => {
+        oModel.read(sPath, {
+            urlParameters: mParams,
+            success: function (oData) {
+                if (!oData.results || oData.results.length === 0) {
+                    reject("No Label_format config found");
+                } else {
+                    resolve(oData.results[0]); // first match
+                }
+            },
+            error: function (oError) {
+                console.error("Label_formatt CDS error", oError);
+                reject(oError);
+            }
+        });
+    });
+},
+
 
         //---------------------------------------------------------------------
         // CLEAR BUTTON
@@ -953,7 +873,7 @@ onPrintProgram: async function () {
 
     try {
         // --------------------------------------------------
-        // 1️ HARD VALIDATIONS
+        // 1️⃣ HARD VALIDATIONS
         // --------------------------------------------------
         if (!data.ibdDetails) {
             return sap.m.MessageBox.error("Inbound Delivery not loaded");
@@ -991,20 +911,16 @@ onPrintProgram: async function () {
         const sCpiUrl = sBaseUrl + "/http/Bartender/Order";
 
         console.log(
-            `Printing ${data.huList.length} HU(s) for GR ${mat.DocumentNo}`
+            `📤 Preparing ${data.huList.length} HU(s) for single CPI call`
         );
 
         // --------------------------------------------------
-        // 2️ PRINT ONLY LATEST HU(s)
+        // 2️⃣ BUILD ARRAY OF Order_HU OBJECTS (NO RESTRUCTURE)
         // --------------------------------------------------
-        const totalHUs = data.huList.length;
-
-      for (let i = 0; i < totalHUs; i++) {
-       const hu = data.huList[i];
-
+        const cpiPayloadArray = data.huList.map((hu, i) => {
             const huItem = hu._HandlingUnitItem?.[0] || {};
 
-            const payload = {
+            return {
                 Order_HU: {
                     // HU
                     HU: hu.HandlingUnitExternalID,
@@ -1042,55 +958,46 @@ onPrintProgram: async function () {
                     Label_Format: data.rfExtras.P1,
                     Printer: data.rfExtras.F1,
                     Plant: ibd.Plant || "",
-    
-                     // ---- Vendor / Manufacturer ----
-            Vendor_Part: isProdOrder ? "" : poItem?.ManufacturerMaterial || "",
-            
 
-            // ---- Dates ----
-            Manufacture_date: ibd.ManufactureDate || "",
-            Exp_date: ibd.ShelfLifeExpirationDate || "",
+                    // Vendor / Manufacturer
+                    Vendor_Part: isProdOrder ? "" : poItem?.ManufacturerMaterial || "",
 
-            // ---- Stock Indicators ----
-            Stock_Category:
-                isProdOrder ? "" :
-                ibd.StockType === "X" ? "X" : "",
+                    // Dates
+                    Manufacture_date: ibd.ManufactureDate || "",
+                    Exp_date: ibd.ShelfLifeExpirationDate || "",
 
-            Special_stock:
-                isProdOrder ? "" :
-                ibd.SpecialStockType || "",
-                Box : `${i + 1} of ${totalHUs}`
+                    // Stock Indicators
+                    Stock_Category:
+                        isProdOrder ? "" :
+                        ibd.StockType === "X" ? "X" : "",
+
+                    Special_stock:
+                        isProdOrder ? "" :
+                        ibd.SpecialStockType || "",
+
+                    Box: `${i + 1} of ${data.huList.length}`
                 }
             };
+        });
 
-            console.log("CPI PAYLOAD in OnPrint →", payload);
+        console.log("📦 CPI PAYLOAD ARRAY →", cpiPayloadArray);
 
-            const resp = await fetch(sCpiUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
+        // --------------------------------------------------
+        // 3️⃣  CPI CALL
+        // --------------------------------------------------
+        const resp = await fetch(sCpiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(cpiPayloadArray)
+        });
 
-            if (!resp.ok) {
-                const err = await resp.text();
-                throw new Error(
-                    `CPI failed for HU ${hu.HandlingUnitExternalID}: ${err}`
-                );
-            }
-
-            // Optional persistence (non-blocking)
-            // try {
-            //     await this._postToHULabelService(payload);
-            // } catch (e) {
-            //     console.warn(
-            //         `HU ${hu.HandlingUnitExternalID} saved partially`,
-            //         e.message
-            //     );
-            // }
+        if (!resp.ok) {
+            const err = await resp.text();
+            throw new Error(`CPI failed: ${err}`);
         }
 
         // --------------------------------------------------
-        // 3️ SUCCESS
+        // 4️⃣ SUCCESS
         // --------------------------------------------------
         sap.m.MessageBox.success(
             `HU Labels printed successfully`,
@@ -1100,138 +1007,149 @@ onPrintProgram: async function () {
             }
         );
 
+        try {
+    cpiPayloadArray.forEach(payload => {
+        // ⚠️ DO NOT await
+        this._postToHULabelService(payload)
+            .then(() => {
+                console.log("✅ HU label persisted");
+            })
+            .catch(err => {
+                // Log only — NEVER interrupt user
+                console.warn("⚠️ HU label persistence failed", err.message);
+            });
+    });
+} catch (e) {
+    console.warn("⚠️ Persistence trigger failed", e.message);
+}
+
     } catch (err) {
-        console.error("Print Flow Error:", err);
+        console.error("❌ Print Flow Error:", err);
         sap.m.MessageBox.error(err.message);
     } finally {
         sap.ui.core.BusyIndicator.hide();
     }
 },
 
-//  _postToHULabelService: function (payload) {
-//             return new Promise((resolve, reject) => {
-//                 const oModel = this.getView().getModel("YY1_hu_label_cds");
+ _postToHULabelService: function (payload) {
+            return new Promise((resolve, reject) => {
+                const oModel = this.getView().getModel("YY1_hu_label_cds");
 
-//                 if (!oModel) {
-//                     console.error("YY1_hu_label_cds model not found");
-//                     return reject(new Error("HU Label service model not configured in manifest"));
-//                 }
+                if (!oModel) {
+                    console.error("YY1_hu_label_cds model not found");
+                    return reject(new Error("HU Label service model not configured in manifest"));
+                }
 
-//                 // UPDATE THIS with your actual entity set name from metadata
-//                 const sEntitySet = "/YY1_HU_LABEL";
+                // UPDATE THIS with your actual entity set name from metadata
+                const sEntitySet = "/YY1_HU_LABEL";
 
                 
-//                 // Map payload to OData structure
-//                 const odataPayload = this._mapPayloadToOData(payload);
+                // Map payload to OData structure
+                const odataPayload = this._mapPayloadToOData(payload);
 
-//                 console.log("Posting to OData:", sEntitySet);
-//                 console.log("OData Payload:", odataPayload);
+                console.log("Posting to OData:", sEntitySet);
+                console.log("OData Payload:", odataPayload);
 
-//                 oModel.create(sEntitySet, odataPayload, {
-//                     success: (oData) => {
-//                         console.log(" OData CREATE Success:", oData);
-//                         resolve(oData);
-//                     },
-//                     error: (oError) => {
-//                         console.error(" OData CREATE Error:", oError);
+                oModel.create(sEntitySet, odataPayload, {
+                    success: (oData) => {
+                        console.log(" OData CREATE Success:", oData);
+                        resolve(oData);
+                    },
+                    error: (oError) => {
+                        console.error(" OData CREATE Error:", oError);
 
-//                         // Parse error message
-//                         let sErrorMsg = "Failed to save to HU Label service";
+                        // Parse error message
+                        let sErrorMsg = "Failed to save to HU Label service";
 
-//                         if (oError.responseText) {
-//                             try {
-//                                 const oErrorResponse = JSON.parse(oError.responseText);
-//                                 sErrorMsg = oErrorResponse.error?.message?.value ||
-//                                     oErrorResponse.error?.innererror?.errordetails?.[0]?.message ||
-//                                     sErrorMsg;
-//                             } catch (e) {
-//                                 sErrorMsg = oError.message || oError.statusText || sErrorMsg;
-//                             }
-//                         }
+                        if (oError.responseText) {
+                            try {
+                                const oErrorResponse = JSON.parse(oError.responseText);
+                                sErrorMsg = oErrorResponse.error?.message?.value ||
+                                    oErrorResponse.error?.innererror?.errordetails?.[0]?.message ||
+                                    sErrorMsg;
+                            } catch (e) {
+                                sErrorMsg = oError.message || oError.statusText || sErrorMsg;
+                            }
+                        }
 
-//                         console.error("Error details:", sErrorMsg);
-//                         reject(new Error(sErrorMsg));
-//                     }
-//                 });
-//             });
-//         },
+                        console.error("Error details:", sErrorMsg);
+                        reject(new Error(sErrorMsg));
+                    }
+                });
+            });
+        },
 
         // ========================================
         // PAYLOAD MAPPING
         //  UPDATE THIS based on your OData metadata
         // ========================================
-        _mapPayloadToOData: function (payload) {
-            const data = payload.Order_HU;
+       _mapPayloadToOData: function (payload) {
+    const data = payload.Order_HU;
 
-            // Map CPI structure to OData entity structure
-            // These field names are EXAMPLES - update based on YOUR metadata
+     const oVM = this.getView().getModel("view");
+    const warehouse = oVM.getProperty("/Warehouse");
 
-             const t = (value) => this._truncateString(value, 20);
-        const odataPayload = {
-    // ========================================
-    // KEY FIELD (REQUIRED!)
-    // ========================================
-    SAP_UUID: this._generateUUID(),
+    const t = (v, len = 20) =>
+        v ? String(v).substring(0, len) : "";
 
-    // ========================================
-    // MANDATORY FIELDS (REQUIRED!)
-    // ========================================
-    GR: t(data.GR || data.GR_No || ""),           // REQUIRED
-    HU: t(data.HU || ""),                          // REQUIRED
-    Plant: t(data.Plant || ""),                    // REQUIRED
+    return {
+        // ========= KEY =========
+        SAP_UUID: this._generateUUID(),
 
-    // ========================================
-    // OPTIONAL FIELDS - EXACT METADATA NAMES
-    // ========================================
-    // Basic HU Info
-    barcode: t(data.barcode || data.HU),
-    Pack_material: t(data.Pack_Material),          // Note: Pack_material not Pack_Material
-    Product: t(data.Product),
-    Mat_Desc: t(data.Prod_Desc),
-    Batch: t(data.Batch),
-    
-    // Quantities & UOM
-    St_Quantity: t(data.Hu_Quantity),              // Note: St_Quantity for HU quantity
-    Quantity: t(data.Hu_Quantity || data.GR_Qty), // Note: Quantity (general)
-    Uom: t(data.Uom),                              // Note: Uom NOT UOM!
-    
-    // Storage Info
-    St_Type: t(data.St_Type),                      // Note: St_Type not StorageType
-    Storage_Loc: t(data.Storage_Location),         // Note: Storage_Loc not StorageLocation
-    Storage_Bin: t(data.Storage_Bin),              // Note: Storage_Bin (correct)
-    
-    // Dates (ALL are strings, no formatting needed!)
-    Exp_Date:t(data.Exp_date),                   // Note: Exp_Date not Exp_date
-    Date_Code: t(data.Manufacture_date),          // Note: Date_Code not ManufactureDate
-    
-    // Purchase Order Info
-    Purchase_Ord: t(data.Purchase_Order),          // Note: Purchase_Ord not PurchaseOrder
-    Vendor_Code: t(data.Vendor_Code),              // Note: Vendor_Code (correct)
-    Stock_Cat: t(data.Stock_Category),             // Note: Stock_Cat not StockCategory
-    Spl_Stock: t(data.Special_stock),              // Note: Spl_Stock not SpecialStock
-    
-    // Production Order Info
-    Prod_Ord: t(data.Prod_Order),                  // Note: Prod_Ord not ProductionOrder
-    Prod_No: t(data.Prod_Order),                   // Note: Prod_No (production number)
-    Int_SerialNo: t(data.Int_Serialno),            // Note: Int_SerialNo not InternalSerialNumber
-    
-    // Additional Fields
-    CO: t(data.CO),
-    IE: t(data.IE),
-    Label_Format: t(data.Label_Format),            // Note: Label_Format (correct)
-    Printer: t(data.Printer),
-    Box: t(data.Box),
-    
-    // Goods Receipt Info
-    GR_Qty: t(data.GR_Qty || data.GRQuantity),    // Note: GR_Qty not GRQuantity
-    //GR_Date: this._formatDateForSAP(data.GR_Date || data.GRDate),
-    GR_Date: t(data.GR_Date || data.GRDate),
+        // ========= CORE DOC INFO =========
+        Inbound_Delivery:               t(data.Delivery),
+        Warehouse:       warehouse,
+        Plant:           t(data.Plant),
+        GRNumber:         t(data.GR),
+        HU:                t(data.HU),
+        barcode:           t(data.barcode),
 
-     // Note: GR_Date not GRDate
-};
+        // ========= MATERIAL =========
+        Pack_material:     t(data.Pack_Material),
+        Product:           t(data.Product),
+        Mat_Desc:          t(data.Prod_Desc),
+        Batch:             t(data.Batch),
 
-            return odataPayload;
-        },
+        // ========= QUANTITY =========
+        St_Quantity:       t(data.Hu_Quantity),
+        Quantity:          t(data.Hu_Quantity || data.GR_Qty),
+        Uom:               t(data.Uom),
+
+        // ========= STORAGE =========
+        St_Type:           t(data.St_Type),
+        Storage_Loc:  t(data.Storage_Location),
+        Storage_Bin:       t(data.Storage_Bin),
+
+        // ========= DATES =========
+        Exp_Date:          t(data.Exp_date),
+        Date_Code:         t(data.Manufacture_date),
+        GR_Date:           t(data.GR_Date),
+
+        // ========= PROCUREMENT =========
+  
+        Purchase_Ord:    t(data.Purchase_Order),
+        Vendor_Code:     t(data.Vendor_Code),
+
+        // ========= STOCK =========
+        Spl_Stock:         t(data.Special_stock),
+        Stock_Cat:         t(data.Stock_Category),
+
+        // ========= PRODUCTION =========
+        Prod_No:           t(data.Prod_Order),
+        Prod_Ord:          t(data.Prod_Order),
+        Int_SerialNo:        t(data.Int_Serialno),
+
+        // ========= UI / PRINT =========
+        CO:                t(data.CO),
+        IE:                t(data.IE),
+        Label_Format:      t(data.Label_Format),
+        Printer:           t(data.Printer),
+        Box:               t(data.Box),
+
+        // ========= GR =========
+        GR_Qty:            t(data.GR_Qty)
+    };
+},
 
         // ========================================
         // HELPER METHODS

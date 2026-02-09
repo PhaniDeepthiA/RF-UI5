@@ -5,7 +5,7 @@
  _fetchInboundDelivery
 
 GET
-https://my430117.s4hana.cloud.sap/sap/opu/odata/sap/API_INBOUND_DELIVERY_SRV;v=0002
+https://my430184.s4hana.cloud.sap/sap/opu/odata/sap/API_INBOUND_DELIVERY_SRV;v=0002
 /A_InbDeliveryHeader('180000088')/to_DeliveryDocumentItem
 
 ✔ Expected:
@@ -25,7 +25,7 @@ If this fails → nothing else matters
  _fetchDocumentFlow
 
 GET
-https://my430117.s4hana.cloud.sap/sap/opu/odata/sap/API_INBOUND_DELIVERY_SRV;v=0002
+https://my430184.s4hana.cloud.sap/sap/opu/odata/sap/API_INBOUND_DELIVERY_SRV;v=0002
 /A_InbDeliveryItem(
   DeliveryDocument='180000088',
   DeliveryDocumentItem='000010'
@@ -46,7 +46,7 @@ SubsequentDocumentCategory = 'R' (GR)
  _fetchMaterialDocumentItem (item)
 
 GET
-https://my430117.s4hana.cloud.sap/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV
+https://my430184.s4hana.cloud.sap/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV
 /A_MaterialDocumentItem(
   MaterialDocument='5000000174',
   MaterialDocumentYear='2026',
@@ -64,7 +64,7 @@ https://my430117.s4hana.cloud.sap/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV
 👉 same method (header)
 
 GET
-https://my430117.s4hana.cloud.sap/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV
+https://my430184.s4hana.cloud.sap/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV
 /A_MaterialDocumentHeader(
   MaterialDocument='5000000174',
   MaterialDocumentYear='2026'
@@ -79,7 +79,7 @@ https://my430117.s4hana.cloud.sap/sap/opu/odata/sap/API_MATERIAL_DOCUMENT_SRV
 ⚠️ This is the critical RF call
 
 GET
-https://my430117.s4hana.cloud.sap/sap/opu/odata4/sap/api_handlingunit
+https://my430184.s4hana.cloud.sap/sap/opu/odata4/sap/api_handlingunit
 /srvd_a2x/sap/handlingunit/0001/HandlingUnit
 ?$filter=HandlingUnitReferenceDocument eq '180000088'
 and Warehouse eq 'PU01'
@@ -100,7 +100,7 @@ and Warehouse eq 'PU01'
 👉 _fetchHUDetails
 
 GET
-https://my430117.s4hana.cloud.sap/sap/opu/odata4/sap/api_handlingunit
+https://my430184.s4hana.cloud.sap/sap/opu/odata4/sap/api_handlingunit
 /srvd_a2x/sap/handlingunit/0001/HandlingUnit(
   HandlingUnitExternalID='300000269',
   Warehouse='PU01'
@@ -117,7 +117,7 @@ https://my430117.s4hana.cloud.sap/sap/opu/odata4/sap/api_handlingunit
 👉 _fetchPO
 
 GET
-https://my430117.s4hana.cloud.sap/sap/opu/odata4/sap/api_purchaseorder_2
+https://my430184.s4hana.cloud.sap/sap/opu/odata4/sap/api_purchaseorder_2
 /PurchaseOrder('4500000226')
 ?$expand=_PurchaseOrderItem
 
@@ -133,7 +133,7 @@ https://my430117.s4hana.cloud.sap/sap/opu/odata4/sap/api_purchaseorder_2
 👉 _fetchCountryOfOrigin
 
 GET
-https://my430117.s4hana.cloud.sap/sap/opu/odata/sap/API_PRODUCT_SRV
+https://my430184.s4hana.cloud.sap/sap/opu/odata/sap/API_PRODUCT_SRV
 /A_Product('RM19')/to_Plant?$filter=Plant eq 'CNP1'
 
 ✔ Expected:

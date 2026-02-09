@@ -1,5 +1,56 @@
+---------------------------------------------------
+Populating def layout scenarios 
 
+1.get default Layout from CBO YY1_LBL_SHIPTO 
+based on 
+Process = 'INBOUND'
+Shipto = 
 
+IF NOT FOUND
+  
+2.get Layout based from CBO YY1_LBL_PLANT 
+based on 
+Process = 'INBOUND'
+Plant = get from PO/Prod ord
+Sloc = get from PO/ Prod ord
+
+Populate into value to screen by default
+     
+3.allow User modified the layout manually also  
+---------------------------------------------------------------
+
+1. IBD
+2. Warehouse
+3. Plant
+4. GR
+5. HU
+6. barcode
+7. Pack_Material
+8. Product
+9. Mat_Desc
+10. Batch
+11. St_Quantity
+12. St_Type
+13. Exp_Date
+14. Date_Code
+15. Prod_No
+16. Quantity
+17. Uom
+18. Purchasing_Doc
+19. Storage_Location
+20. Storage_Bin
+21. Vendor
+22. Spl_Stock
+23. Stock_Cat
+24. Prod_Ord
+25. Int_Serial
+26. CO
+27. IE
+28. Label_Format
+29. Printer
+30. Box
+31. GR_Qty
+32. GR_Date
 
 
 
